@@ -36,7 +36,6 @@ areaABImage = pygame.transform.scale(
     pygame.image.load("./img/area_AB.png"), imageScaler
 )
 
-
 def drawGrids(W, H, WS):
     for i in range(1, W):
         pygame.draw.line(
@@ -77,27 +76,12 @@ def captureField_struct(W, H, WS, field, field2, fileName):
             if field2[i][j] == 0:
                 pass
             if field2[i][j] > 0:
-                placeImage(WS, workerBImage, i, j)
-            if field2[i][j] < 0:
                 placeImage(WS, workerAImage, i, j)
+            if field2[i][j] < 0:
+                placeImage(WS, workerBImage, i, j)
         # print()
     drawGrids(W, H, WS)
     pygame.image.save(WS, fileName)
-
-print("Image_Generating...")
-fieldPath = "./Field_Data/Field_Structures.txt"
-fieldPath2 = "./Field_Data/Field_Masons.txt"
-f = open(fieldPath,"r")
-field = eval(f.read())
-f2 = open(fieldPath2,"r")
-field2 = eval(f2.read())
-pygame.init()
-W = len(field[0])
-H = len(field)
-WS = pygame.display.set_mode((CELL_SIZE * W, CELL_SIZE * H))
-captureField_struct(
-    W, H, WS, field, field2, fileName="./Field_Data/visualized_struct_masons.png")
-
 
 def captureField_area(W, H, WS, field, field2, fileName):
     for i in range(H):
@@ -124,15 +108,32 @@ def captureField_area(W, H, WS, field, field2, fileName):
     drawGrids(W, H, WS)
     pygame.image.save(WS, fileName)
 
-fieldPath = "./Field_Data/Field_Walls.txt"
-fieldPath2 = "./Field_Data/Field_Territories.txt"
-f = open(fieldPath,"r")
-field = eval(f.read())
-f2 = open(fieldPath2,"r")
-field2 = eval(f2.read())
-pygame.init()
-W = len(field[0])
-H = len(field)
-WS = pygame.display.set_mode((CELL_SIZE * W, CELL_SIZE * H))
-captureField_area(
-    W, H, WS, field, field2, fileName="./Field_Data/visualized_wall_territories.png")
+
+def main():
+    print("Image_Generating...")
+    fieldPath = "./Field_Data/Field_Structures.txt"
+    fieldPath2 = "./Field_Data/Field_Masons.txt"
+    f = open(fieldPath,"r")
+    field = eval(f.read())
+    f2 = open(fieldPath2,"r")
+    field2 = eval(f2.read())
+    pygame.init()
+    W = len(field[0])
+    H = len(field)
+    WS = pygame.display.set_mode((CELL_SIZE * W, CELL_SIZE * H))
+    captureField_struct(W, H, WS, field, field2, 
+                        fileName="./Field_Data/visualized_struct_masons.png")
+
+
+    fieldPath = "./Field_Data/Field_Walls.txt"
+    fieldPath2 = "./Field_Data/Field_Territories.txt"
+    f = open(fieldPath,"r")
+    field = eval(f.read())
+    f2 = open(fieldPath2,"r")
+    field2 = eval(f2.read())
+    pygame.init()
+    W = len(field[0])
+    H = len(field)
+    WS = pygame.display.set_mode((CELL_SIZE * W, CELL_SIZE * H))
+    captureField_area(W, H, WS, field, field2, 
+                      fileName="./Field_Data/visualized_wall_territories.png")

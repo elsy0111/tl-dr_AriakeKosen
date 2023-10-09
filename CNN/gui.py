@@ -3,7 +3,9 @@ from copy import deepcopy as dc
 from datetime import datetime
 from time import sleep
 from PIL import Image
-
+import vis
+import lib
+from random import randint
 
 
 import requests as rq
@@ -448,6 +450,52 @@ def page3():
     st.write("Status Code :", st.session_state.status_code3_1, st.session_state.dt_now3_1)
     st.write("Simple :", st.session_state.res_fmt3_1)
 
+    Random = st.button("Random Legal")
+    if Random:
+        c = False
+        st.session_state.dt_now3_1 = datetime.now()
+        try:
+            st.session_state.res3_1, st.session_state.status_code3_1 = get_matching(st.session_state.ID)
+            c = True
+        except:
+            st.session_state.status_code3_1 = 400
+            st.session_state.res_fmt3_1 = {
+                "operation Get_Matching" : {
+                    "params" : 'id', 
+                    "error" : "field required"
+                    }
+            }
+            st.session_state.turn = -1
+        if c:
+            try:
+                st.session_state.res_fmt3_1 = simple_get_matching(st.session_state.res3_1)
+                st.session_state.turn = st.session_state.res3_1["turn"]
+            except:
+                st.session_state.status_code3_1 = 400
+                st.session_state.turn = -1
+
+        print("\nRandom ===========================")
+        st.session_state.dt_now3_2 = datetime.now()
+        if ((st.session_state.turn + 1) % 2 == 0):
+            st.session_state.res3_2 = {
+                    "operation Post_Actions" : {
+                            "params" : 'turn', 
+                            "error" : "its opponent turn. not your turn"
+                        }
+                    }
+            st.session_state.post = None
+            print("post_actions status_code : 400")
+        else:
+            legal_actions = lib.main()
+            random_actions = []
+            for i in range(len(legal_actions)):
+                j = randint(0,len(legal_actions[i]) - 1)
+                random_actions.append(legal_actions[i][j])
+            print(random_actions)
+            st.session_state.post, st.session_state.res3_2, st.session_state.status_code3_2 = post_actions(st.session_state.ID, 
+                                                                                    st.session_state.turn + 1, 
+                                                                                    str(random_actions))
+
     # Post_Actions ========================================================
 
     Post_Actions = st.button("Post_Actions")
@@ -532,7 +580,7 @@ def page4():
                 f = open("./Field_Data/Field_Territories.txt","w")
                 f.write(str(st.session_state.res4["board"]["territories"]))
                 f.close()
-                import vis
+                vis.main()
                 st.session_state.vis_struct_mason = Image.open("./Field_Data/visualized_struct_masons.png")
                 st.session_state.vis_wall_territories = Image.open("./Field_Data/visualized_wall_territories.png")
             except:
