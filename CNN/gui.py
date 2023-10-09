@@ -1,12 +1,12 @@
 import streamlit as st
 from copy import deepcopy as dc
 from datetime import datetime
-from time import sleep
 from PIL import Image
 import vis
 import lib
+import threading
+import time
 from random import randint
-
 
 import requests as rq
 import json
@@ -14,10 +14,9 @@ import json
 # url = "https://www.procon.gr.jp/"
 url = "http://127.0.0.1:3000/"
 # api_token = "ariakee5d5af0c7ad9401b6449eda7ee0e8730f24f77d5b6da2ac615aca3c1f4"
-api_token = "A"
+# api_token = "A"
+api_tokens = ["A","B"]
 # header = {"procon-token" : api_token}
-header = {"Content-Type" : "application/json",
-          "procon-token" : api_token}
 
 # 試合一覧取得API
 # 参加する試合の一覧を取得するAPIです
@@ -46,7 +45,13 @@ header = {"Content-Type" : "application/json",
 #            bool   first               自チームが先手かどうか
 #            ] }
 
-def get_matches():
+def get_matches(First = True):
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     r = rq.get(url + "matches", headers = header)
     response = r.json()
     status_code = r.status_code
@@ -90,13 +95,19 @@ def get_matches():
 #
 #           }
 
-def get_matching(id : int):
+def get_matching(id : int,First = True):
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     r = rq.get(url + "matches/" + str(id), headers = header)
     response = r.json()
     status_code = r.status_code
     print("get_matching status_code :", r.status_code)
 
-    r_ = get_matches_id(id)
+    r_ = get_matches_id(id,First)
     response["first"] = r_["first"]
     response["opponent"] = r_["opponent"]
     response["turns"] = r_["turns"]
@@ -117,7 +128,13 @@ def get_matching(id : int):
 #                   ] }                               8 : 左　,  0 : 無方向, 4 : 右　, 
 #           }                                         7 : 左下,  6 : 下　　, 5 : 右下)
 
-def post_actions(id : int, turn : int, actions_arr : list):
+def post_actions(id : int, turn : int, actions_arr : list, First = True):
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     try:
         actions_arr = eval(actions_arr)
 
@@ -172,13 +189,19 @@ def list2json(actions : list):
     # print(j)
     return j
 
-def get_matches_id(id : int):
+def get_matches_id(id : int,First = True):
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     r = rq.get(url + "matches", headers = header)
     response = r.json()
     for match in response["matches"]:
         if match.get("id") == int(id):
             status_code = r.status_code
-            print("get_matches_id status_code :", r.status_code)
+            print("get_matches_id status_code :", status_code)
             return match
     return -1
 
@@ -304,6 +327,7 @@ def page2():
         try:
             st.session_state.res2, st.session_state.status_code2 = get_matching(st.session_state.ID)
             c = True
+            st.session_state.is_first = st.session_state.res2["first"]
         except:
             st.session_state.status_code2 = 400
             st.session_state.res2 = {
@@ -327,6 +351,7 @@ def page2():
     st.text_input("ID", key="ID")
 
     st.write("Status Code :", st.session_state.status_code2, st.session_state.dt_now2)
+    st.write("FIRST :", st.session_state.is_first)
     # st.write("Raw :  ", st.session_state.res2)
     st.write("Simple : ", st.session_state.res_fmt2)
     st.write("Logs : ", st.session_state.logs2)
@@ -374,6 +399,7 @@ def page3():
         try:
             st.session_state.res3_1, st.session_state.status_code3_1 = get_matching(st.session_state.ID)
             c = True
+            st.session_state.is_first = st.session_state.res3_1["first"]
         except:
             st.session_state.status_code3_1 = 400
             st.session_state.res_fmt3_1 = {
@@ -413,7 +439,7 @@ def page3():
         else:
             st.session_state.post, st.session_state.res3_2, st.session_state.status_code3_2 = post_actions(st.session_state.ID, 
                                                                                     st.session_state.turn + 1, 
-                                                                                    st.session_state.Actions)
+                                                                                    st.session_state.Actions,st.session_state.is_first)
         print("post_actions status code :", st.session_state.status_code3_2)
 
     # Get_Matching (Auto_Fill) ==============================================
@@ -457,6 +483,7 @@ def page3():
         try:
             st.session_state.res3_1, st.session_state.status_code3_1 = get_matching(st.session_state.ID)
             c = True
+            st.session_state.is_first = st.session_state.res3_1["first"]
         except:
             st.session_state.status_code3_1 = 400
             st.session_state.res_fmt3_1 = {
@@ -494,7 +521,7 @@ def page3():
             print(random_actions)
             st.session_state.post, st.session_state.res3_2, st.session_state.status_code3_2 = post_actions(st.session_state.ID, 
                                                                                     st.session_state.turn + 1, 
-                                                                                    str(random_actions))
+                                                                                    str(random_actions),st.session_state.is_first)
 
     # Post_Actions ========================================================
 
@@ -514,7 +541,7 @@ def page3():
         else:
             st.session_state.post, st.session_state.res3_2, st.session_state.status_code3_2 = post_actions(st.session_state.ID, 
                                                                                     st.session_state.turn + 1, 
-                                                                                    st.session_state.Actions)
+                                                                                    st.session_state.Actions,st.session_state.is_first)
 
     # Input / Output ========================================================
 
@@ -530,90 +557,443 @@ def page4():
     st.title("Visualizer")
 
     # Init ==================================================================
+    if 'worker' not in st.session_state:
+        st.session_state.worker = None
+    worker = st.session_state.worker
 
-    if "res4" not in st.session_state:
-        st.session_state.res4 = None
+    if "Autoreload_4" not in st.session_state:
+        st.session_state.Autoreload_4 = False
 
-    if "turn4" not in st.session_state:
-        st.session_state.turn4 = -1
+    # if "res4" not in st.session_state:
+    #     st.session_state.res4 = None
 
-    if "status_code4" not in st.session_state:
-        st.session_state.status_code4 = None
+    # if "turn4" not in st.session_state:
+    #     st.session_state.turn4 = -1
 
-    if "dt_now4" not in st.session_state:
-        st.session_state.dt_now4 = None
+    # if "status_code4" not in st.session_state:
+    #     st.session_state.status_code4 = None
+
+    # if "dt_now4" not in st.session_state:
+    #     st.session_state.dt_now4 = None
     
-    if "vis_struct_mason" not in st.session_state:
-        st.session_state.vis_struct_mason = Image.open("./img/None.png")
+    # if "vis_struct_mason" not in st.session_state:
+    #     st.session_state.vis_struct_mason = Image.open("./img/None.png")
 
-    if "vis_wall_territories" not in st.session_state:
-        st.session_state.vis_wall_territories = Image.open("./img/None.png")
+    # if "vis_wall_territories" not in st.session_state:
+    #     st.session_state.vis_wall_territories = Image.open("./img/None.png")
 
-    
+    class Worker(threading.Thread):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.res4 = None
+            self.turn4 = -1
+            self.status_code4 = None
+            self.dt_now4 = None
+            self.ID = st.session_state.ID
+            self.vis_struct_mason = Image.open("./img/None.png")
+            self.vis_wall_territories = Image.open("./img/None.png")
+            self.should_stop = threading.Event()
+            
+        def run(self):
+            while not self.should_stop.wait(0):
+                time.sleep(1)
+                print("\nGet_Matching ===========================")
+                self.c = False
+                self.dt_now4 = datetime.now()
+                try:
+                    self.res4, self.status_code4 = get_matching(self.ID)
+                    self.c = True
+                except:
+                    self.status_code4 = 400
+                    self.turn4 = None
+                    self.vis_struct_mason = Image.open("./img/None.png")
+                    self.vis_wall_territories = Image.open("./img/None.png")
+                if self.c:
+                    try:
+                        self.turn4 = self.res4["turn"]
+                        f = open("./Field_Data/Field_Structures.txt","w")
+                        f.write(str(self.res4["board"]["structures"]))
+                        f.close()
+                        f = open("./Field_Data/Field_Masons.txt","w")
+                        f.write(str(self.res4["board"]["masons"]))
+                        f.close()
+                        f = open("./Field_Data/Field_Walls.txt","w")
+                        f.write(str(self.res4["board"]["walls"]))
+                        f.close()
+                        f = open("./Field_Data/Field_Territories.txt","w")
+                        f.write(str(self.res4["board"]["territories"]))
+                        f.close()
+                        vis.main()
+                        self.vis_struct_mason = Image.open("./Field_Data/visualized_struct_masons.png" + ".png")
+                        self.vis_wall_territories = Image.open("./Field_Data/visualized_wall_territories.png" + ".png")
+                    except:
+                        self.status_code4 = 400
+                        self.turn4 = None
+                        self.vis_struct_mason = Image.open("./img/None.png")
+                        self.vis_wall_territories = Image.open("./img/None.png")
+                
+
     # Get_Matching (Auto_Reload) ==============================================
 
-    Get_Matching = st.button("Auto Reload")
-    if Get_Matching:
-        print("\nGet_Matching ===========================")
-        c = False
-        st.session_state.dt_now4 = datetime.now()
-        try:
-            st.session_state.res4, st.session_state.status_code4 = get_matching(st.session_state.ID)
-            c = True
-        except:
-            st.session_state.status_code4 = 400
-            st.session_state.turn4 = None
-            st.session_state.vis_struct_mason = Image.open("./img/None.png")
-            st.session_state.vis_wall_territories = Image.open("./img/None.png")
-        if c:
+    # Get_Matching = st.button("Auto Reload")
+    # if Get_Matching:
+    #     print("\nGet_Matching ===========================")
+    #     c = False
+    #     st.session_state.dt_now4 = datetime.now()
+    #     try:
+    #         st.session_state.res4, st.session_state.status_code4 = get_matching(st.session_state.ID)
+    #         c = True
+    #     except:
+    #         st.session_state.status_code4 = 400
+    #         st.session_state.turn4 = None
+    #         st.session_state.vis_struct_mason = Image.open("./img/None.png")
+    #         st.session_state.vis_wall_territories = Image.open("./img/None.png")
+    #     if c:
+    #         try:
+    #             st.session_state.turn4 = st.session_state.res4["turn"]
+    #             f = open("./Field_Data/Field_Structures.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["structures"]))
+    #             f.close()
+    #             f = open("./Field_Data/Field_Masons.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["masons"]))
+    #             f.close()
+    #             f = open("./Field_Data/Field_Walls.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["walls"]))
+    #             f.close()
+    #             f = open("./Field_Data/Field_Territories.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["territories"]))
+    #             f.close()
+    #             vis.main()
+    #             st.session_state.vis_struct_mason = Image.open("./Field_Data/visualized_struct_masons.png")
+    #             st.session_state.vis_wall_territories = Image.open("./Field_Data/visualized_wall_territories.png")
+    #         except:
+    #             st.session_state.status_code4 = 400
+    #             st.session_state.turn4 = None
+    #             st.session_state.vis_struct_mason = Image.open("./img/None.png")
+    #             st.session_state.vis_wall_territories = Image.open("./img/None.png")
+
+
+    st.text_input("ID", key="ID")
+    Switch_Auto_Reload = st.button("Switch Auto Reload")
+    if Switch_Auto_Reload:
+        print("Auto Reload", st.session_state.Autoreload_4,"->",not st.session_state.Autoreload_4)
+        st.session_state.Autoreload_4 = not st.session_state.Autoreload_4
+        if st.session_state.Autoreload_4:
+            worker = st.session_state.worker = Worker(daemon=True)
+            worker.start()
+            st.experimental_rerun()
+        else:
             try:
-                st.session_state.turn4 = st.session_state.res4["turn"]
-                f = open("./Field_Data/Field_Structures.txt","w")
-                f.write(str(st.session_state.res4["board"]["structures"]))
-                f.close()
-                f = open("./Field_Data/Field_Masons.txt","w")
-                f.write(str(st.session_state.res4["board"]["masons"]))
-                f.close()
-                f = open("./Field_Data/Field_Walls.txt","w")
-                f.write(str(st.session_state.res4["board"]["walls"]))
-                f.close()
-                f = open("./Field_Data/Field_Territories.txt","w")
-                f.write(str(st.session_state.res4["board"]["territories"]))
-                f.close()
-                vis.main()
-                st.session_state.vis_struct_mason = Image.open("./Field_Data/visualized_struct_masons.png")
-                st.session_state.vis_wall_territories = Image.open("./Field_Data/visualized_wall_territories.png")
+                worker.should_stop.set()
+                # 終了まで待つ
+                worker.join()
+                worker = st.session_state.worker = None
+                st.experimental_rerun()
             except:
-                st.session_state.status_code4 = 400
-                st.session_state.turn4 = None
-                st.session_state.vis_struct_mason = Image.open("./img/None.png")
-                st.session_state.vis_wall_territories = Image.open("./img/None.png")
+                None
+
+    st.write("Auto Reload is ", st.session_state.Autoreload_4)
 
     # Input / Output ========================================================
 
+
+    # worker の状態を表示する部分
+    if worker is None:
+        st.markdown('No worker running.')
+    else:
+        st.markdown(f'worker: {worker.getName()}')
+        placeholder1 = st.empty()
+        placeholder2 = st.empty()
+        placeholder3 = st.empty()
+        while worker.is_alive():
+            placeholder1.write(["Status Code :", worker.status_code4, worker.dt_now4, worker.turn4])
+            # # st.write("Raw :", worker.res4)
+            # placeholder.write("Turn :", worker.turn4)
+            placeholder2.image(worker.vis_struct_mason, caption='Struct and Masons')
+            placeholder3.image(worker.vis_wall_territories, caption='Walls and Territories')
+            time.sleep(1)
+
+def page5():
+    st.title("Greedy_Actions")
+
+    # Init ==================================================================
+    if 'worker_5' not in st.session_state:
+        st.session_state.worker_5 = None
+    worker_5 = st.session_state.worker_5
+
+    if "Autoreload_5" not in st.session_state:
+        st.session_state.Autoreload_5 = False
+
+
+    class Worker_5(threading.Thread):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.res5_1 = None
+            self.res5_2 = None
+            self.res_fmt5_1 = None
+            self.turn5 = -1
+            self.status_code5_1 = None
+            self.status_code5_2 = None
+            self.dt_now5_1 = None
+            self.dt_now5_2 = None
+            self.ID = st.session_state.ID
+            self.post5 = None
+            self.should_stop_5 = threading.Event()
+            
+        def run(self):
+            while not self.should_stop_5.wait(0):
+                time.sleep(1)
+                self.c = False
+                self.dt_now5_1 = datetime.now()
+                try:
+                    self.res5_1, self.status_code5_1 = get_matching(self.ID)
+                    self.c = True
+                except:
+                    self.status_code5_1 = 400
+                    self.res_fmt5_1 = {
+                        "operation Get_Matching" : {
+                            "params" : 'id', 
+                            "error" : "field required"
+                            }
+                    }
+                    self.turn5 = -1
+                if self.c:
+                    try:
+                        self.res_fmt5_1 = simple_get_matching(self.res5_1)
+                        self.turn5 = self.res5_1["turn"]
+                    except:
+                        self.status_code5_1 = 400
+                        self.turn5 = -1
+
+                print("\nRandom ===========================")
+                self.dt_now5_2 = datetime.now()
+                if ((self.turn5 + 1) % 2 == 0):
+                    self.res5_2 = {
+                            "operation Post_Actions" : {
+                                    "params" : 'turn', 
+                                    "error" : "its opponent turn. not your turn"
+                                }
+                            }
+                    self.post5 = None
+                    print("post_actions status_code : 400")
+                else:
+                    legal_actions = lib.main()
+                    random_actions = []
+                    try:
+                        for i in range(len(legal_actions)):
+                            cc = True
+                            for j in range(len(legal_actions[i])):
+                                if legal_actions[i][j][0] == 2:
+                                    random_actions.append(legal_actions[i][j])
+                                    cc = False
+                                    break
+                            if cc:
+                                j = randint(0,len(legal_actions[i]) - 1)
+                                random_actions.append(legal_actions[i][j])
+                        print(random_actions)
+                        self.post5, self.res5_2, self.status_code5_2 = post_actions(self.ID, 
+                                                                                    self.turn5 + 1, 
+                                                                                    str(random_actions))
+                    except:
+                        None
+
+    # Switcher      ========================================================
+
     st.text_input("ID", key="ID")
+    Switch_Auto_Reload_5 = st.button("Switch Auto Reload")
+    if Switch_Auto_Reload_5:
+        print("Auto Reload", st.session_state.Autoreload_5,"->",not st.session_state.Autoreload_5)
+        st.session_state.Autoreload_5 = not st.session_state.Autoreload_5
+        if st.session_state.Autoreload_5:
+            worker_5 = st.session_state.worker_5 = Worker_5(daemon=True)
+            worker_5.start()
+            st.experimental_rerun()
+        else:
+            try:
+                worker_5.should_stop_5.set()
+                # 終了まで待つ
+                worker_5.join()
+                worker_5 = st.session_state.worker_5 = None
+                st.experimental_rerun()
+            except:
+                None
 
-    st.write("Status Code :", st.session_state.status_code4, st.session_state.dt_now4)
-    st.write("Raw :", st.session_state.res4)
-    st.write("Turn :", st.session_state.turn4)
-    st.image(st.session_state.vis_struct_mason, caption='Struct and Masons')
+    st.write("Auto Reload is ", st.session_state.Autoreload_5)
+
+    # Input / Output ========================================================
+
+    # worker の状態を表示する部分
+    if worker_5 is None:
+        st.markdown('No worker running.')
+    else:
+        st.markdown(f'worker_5: {worker_5.getName()}')
+        placeholder1 = st.empty()
+        placeholder2 = st.empty()
+        placeholder3 = st.empty()
+        placeholder4 = st.empty()
+        placeholder5 = st.empty()
+        placeholder6 = st.empty()
+        placeholder7 = st.empty()
+        while worker_5.is_alive():
+            placeholder1.write(["Get Status Code :", worker_5.status_code5_1])
+            placeholder2.write(["Get Time :", worker_5.dt_now5_1])
+            placeholder3.write(["Current Turn :", worker_5.turn5])
+            placeholder4.write(["Response Get :", worker_5.res_fmt5_1])
+            placeholder5.write(["Send Status Code :", worker_5.status_code5_2])
+            placeholder6.write(["Send Action :", worker_5.post5])
+            placeholder7.write(["Response Send :", worker_5.res5_2])
+            # # st.write("Raw :", worker.res4)
+            # placeholder.write("Turn :", worker.turn4)
+            time.sleep(1)
 
 
-    st.image(st.session_state.vis_wall_territories, caption='Walls and Territories')
+def page6():
+    st.title("Greedy_Actions_B")
 
-    # while True:
-    #     sleep(1)
+    # Init ==================================================================
+    if 'worker_6' not in st.session_state:
+        st.session_state.worker_6 = None
+    worker_6 = st.session_state.worker_6
+
+    if "Autoreload_6" not in st.session_state:
+        st.session_state.Autoreload_6 = False
+
+
+    class Worker_6(threading.Thread):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.res6_1 = None
+            self.res6_2 = None
+            self.res_fmt6_1 = None
+            self.turn6 = -1
+            self.status_code6_1 = None
+            self.status_code6_2 = None
+            self.dt_now6_1 = None
+            self.dt_now6_2 = None
+            self.ID = st.session_state.ID
+            self.post6 = None
+            self.should_stop_6 = threading.Event()
+            
+        def run(self):
+            while not self.should_stop_6.wait(0):
+                time.sleep(1)
+                self.c = False
+                self.dt_now6_1 = datetime.now()
+                try:
+                    self.res6_1, self.status_code6_1 = get_matching(self.ID,First=False)
+                    self.c = True
+                except:
+                    self.status_code6_1 = 400
+                    self.res_fmt6_1 = {
+                        "operation Get_Matching" : {
+                            "params" : 'id', 
+                            "error" : "field required"
+                            }
+                    }
+                    self.turn6 = -1
+                if self.c:
+                    try:
+                        self.res_fmt6_1 = simple_get_matching(self.res6_1)
+                        self.turn6 = self.res6_1["turn"]
+                    except:
+                        self.status_code6_1 = 400
+                        self.turn6 = -1
+
+                print("\nRandom ===========================")
+                self.dt_now6_2 = datetime.now()
+                if ((self.turn6 + False) % 2 == 0):
+                    self.res6_2 = {
+                            "operation Post_Actions" : {
+                                    "params" : 'turn', 
+                                    "error" : "its opponent turn. not your turn"
+                                }
+                            }
+                    self.post6 = None
+                    print("post_actions status_code : 400")
+                else:
+                    legal_actions = lib.main(False)
+                    random_actions = []
+                    try:
+                        for i in range(len(legal_actions)):
+                            cc = True
+                            for j in range(len(legal_actions[i])):
+                                if legal_actions[i][j][0] == 2:
+                                    random_actions.append(legal_actions[i][j])
+                                    cc = False
+                                    break
+                            if cc:
+                                j = randint(0,len(legal_actions[i]) - 1)
+                                random_actions.append(legal_actions[i][j])
+                        print(random_actions)
+                        self.post6, self.res6_2, self.status_code6_2 = post_actions(self.ID, 
+                                                                                    self.turn6 + 1, 
+                                                                                    str(random_actions),First = False)
+                    except:
+                        None
+
+    # Switcher      ========================================================
+
+    st.text_input("ID", key="ID")
+    Switch_Auto_Reload_6 = st.button("Switch Auto Reload")
+    if Switch_Auto_Reload_6:
+        print("Auto Reload", st.session_state.Autoreload_6,"->",not st.session_state.Autoreload_6)
+        st.session_state.Autoreload_6 = not st.session_state.Autoreload_6
+        if st.session_state.Autoreload_6:
+            worker_6 = st.session_state.worker_6 = Worker_6(daemon=True)
+            worker_6.start()
+            st.experimental_rerun()
+        else:
+            try:
+                worker_6.should_stop_6.set()
+                # 終了まで待つ
+                worker_6.join()
+                worker_6 = st.session_state.worker_6 = None
+                st.experimental_rerun()
+            except:
+                None
+
+    st.write("Auto Reload is ", st.session_state.Autoreload_6)
+
+    # Input / Output ========================================================
+
+    # worker の状態を表示する部分
+    if worker_6 is None:
+        st.markdown('No worker running.')
+    else:
+        st.markdown(f'worker_6: {worker_6.getName()}')
+        placeholder1 = st.empty()
+        placeholder2 = st.empty()
+        placeholder3 = st.empty()
+        placeholder4 = st.empty()
+        placeholder5 = st.empty()
+        placeholder6 = st.empty()
+        placeholder7 = st.empty()
+        while worker_6.is_alive():
+            placeholder1.write(["Get Status Code :", worker_6.status_code6_1])
+            placeholder2.write(["Get Time :", worker_6.dt_now6_1])
+            placeholder3.write(["Current Turn :", worker_6.turn6])
+            placeholder4.write(["Response Get :", worker_6.res_fmt6_1])
+            placeholder5.write(["Send Status Code :", worker_6.status_code6_2])
+            placeholder6.write(["Send Action :", worker_6.post6])
+            placeholder7.write(["Response Send :", worker_6.res6_2])
+            # # st.write("Raw :", worker.res4)
+            # placeholder.write("Turn :", worker.turn4)
+            time.sleep(1)
+
+
 
 pages = dict(
     page1="Get_Matches",
     page2="Get_Matching",
     page3="Post_Actions",
-    page4="Visualizer"
+    page4="Visualizer",
+    page5="Greedy?Random",
+    page6="Greedy?Random B"
 )
 
 page_id = st.sidebar.selectbox( # st.sidebar.*でサイドバーに表示する
     "Change",
-    ["page1", "page2", "page3", "page4"],
+    ["page1", "page2", "page3", "page4", "page5", "page6"],
     format_func=lambda page_id: pages[page_id], # 描画する項目を日本語に変換
 )
 
@@ -628,3 +1008,9 @@ if page_id == "page3":
 
 if page_id == "page4":
     page4()
+
+if page_id == "page5":
+    page5()
+
+if page_id == "page6":
+    page6()

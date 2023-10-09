@@ -82,12 +82,13 @@ def captureField_struct(W, H, WS, field, field2, fileName):
         # print()
     drawGrids(W, H, WS)
     pygame.image.save(WS, fileName)
+    pygame.image.save(WS, fileName + ".png")
 
-def captureField_area(W, H, WS, field, field2, fileName):
+def captureField_area(W, H, WS, field0, field, field2, fileName):
     for i in range(H):
         for j in range(W):
             placeImage(WS, blankImage, i, j)
-            print(field2[i][j], end=" ")
+            # print(field2[i][j], end=" ")
 
             if field[i][j] == 0:
                 pass
@@ -104,10 +105,17 @@ def captureField_area(W, H, WS, field, field2, fileName):
                 placeImage(WS, areaBImage, i, j)
             if field2[i][j] == 3:
                 placeImage(WS, areaABImage, i, j)
-        print()
+
+            if field0[i][j] == 0:
+                pass
+            if field0[i][j] > 0:
+                placeImage(WS, workerAImage, i, j)
+            if field0[i][j] < 0:
+                placeImage(WS, workerBImage, i, j)
+        # print()
     drawGrids(W, H, WS)
     pygame.image.save(WS, fileName)
-
+    pygame.image.save(WS, fileName + ".png")
 
 def main():
     print("Image_Generating...")
@@ -125,15 +133,14 @@ def main():
                         fileName="./Field_Data/visualized_struct_masons.png")
 
 
-    fieldPath = "./Field_Data/Field_Walls.txt"
-    fieldPath2 = "./Field_Data/Field_Territories.txt"
-    f = open(fieldPath,"r")
-    field = eval(f.read())
-    f2 = open(fieldPath2,"r")
-    field2 = eval(f2.read())
+    fieldPath3 = "./Field_Data/Field_Walls.txt"
+    fieldPath4 = "./Field_Data/Field_Territories.txt"
+    f3 = open(fieldPath3,"r")
+    field3 = eval(f3.read())
+    f4 = open(fieldPath4,"r")
+    field4 = eval(f4.read())
     pygame.init()
-    W = len(field[0])
-    H = len(field)
     WS = pygame.display.set_mode((CELL_SIZE * W, CELL_SIZE * H))
-    captureField_area(W, H, WS, field, field2, 
+    captureField_area(W, H, WS, field2, field3, field4, 
                       fileName="./Field_Data/visualized_wall_territories.png")
+    print("Finished!")
