@@ -593,6 +593,8 @@ def page4():
             self.vis_struct_mason = Image.open("./img/None.png")
             self.vis_wall_territories = Image.open("./img/None.png")
             self.should_stop = threading.Event()
+            self.scoreA = -1
+            self.scoreB = -1
             
         def run(self):
             while not self.should_stop.wait(0):
@@ -624,6 +626,7 @@ def page4():
                         f.write(str(self.res4["board"]["territories"]))
                         f.close()
                         vis.main()
+                        self.scoreA, self.scoreB = lib.calculate()
                         self.vis_struct_mason = Image.open("./Field_Data/visualized_struct_masons.png" + ".png")
                         self.vis_wall_territories = Image.open("./Field_Data/visualized_wall_territories.png" + ".png")
                     except:
@@ -705,12 +708,18 @@ def page4():
         placeholder1 = st.empty()
         placeholder2 = st.empty()
         placeholder3 = st.empty()
+        placeholder4 = st.empty()
+        placeholder5 = st.empty()
+        placeholdersA = st.empty()
+        placeholdersB = st.empty()
         while worker.is_alive():
-            placeholder1.write(["Status Code :", worker.status_code4, worker.dt_now4, worker.turn4])
-            # # st.write("Raw :", worker.res4)
-            # placeholder.write("Turn :", worker.turn4)
-            placeholder2.image(worker.vis_struct_mason, caption='Struct and Masons')
-            placeholder3.image(worker.vis_wall_territories, caption='Walls and Territories')
+            placeholdersA.write(["Score A :", worker.scoreA]) 
+            placeholdersB.write(["Score B :", worker.scoreB]) 
+            placeholder1.write(["Status Code :", worker.status_code4])
+            placeholder2.write(["Time :", worker.dt_now4])
+            placeholder3.write(["Turn :", worker.turn4])
+            placeholder4.image(worker.vis_struct_mason, caption='Struct and Masons')
+            placeholder5.image(worker.vis_wall_territories, caption='Walls and Territories')
             time.sleep(1)
 
 def page5():
