@@ -18,22 +18,13 @@ fontL = pygame.font.SysFont("Serif", 70)
 
 init_Arr = [[0 for _ in range(H)] for _ in range(H)]
 f = open("./Plan/Move.txt", "w")
-f.write("[" + "\n")
-for ii in init_Arr:
-    f.write(str(ii) + ",\n")
-f.write("]")
+f.write(str(init_Arr))
 f.close()
 f = open("./Plan/Build.txt", "w")
-f.write("[" + "\n")
-for ii in init_Arr:
-    f.write(str(ii) + ",\n")
-f.write("]")
+f.write(str(init_Arr))
 f.close()
 f = open("./Plan/Break.txt", "w")
-f.write("[" + "\n")
-for ii in init_Arr:
-    f.write(str(ii) + ",\n")
-f.write("]")
+f.write(str(init_Arr))
 f.close()
 
 button_clear = (1000, 50,400,70)
@@ -124,7 +115,7 @@ while running:
             running = False
             
     try:
-        Field_image = pygame.transform.scale(pygame.image.load(r"Field_Data\visualized_wall_territories.png.png"), image_size)
+        Field_image = pygame.transform.scale(pygame.image.load(r"Field_Data\visualized_wall_territories.png"), image_size)
     except:
         None
     Field_image.set_alpha(90)
@@ -273,26 +264,23 @@ while running:
                     print(Selected_Rect)
                     if Actions_pattern == 1:
                         f = open("./Plan/Move.txt", "r")
-                        Arr = eval(f.read().replace("\n",""))
+                        Arr = eval(f.read())
                         f.close()
                         f = open("./Plan/Move.txt", "w")
                     if Actions_pattern == 2:
                         f = open("./Plan/Build.txt", "r")
-                        Arr = eval(f.read().replace("\n",""))
+                        Arr = eval(f.read())
                         f.close()
                         f = open("./Plan/Build.txt", "w")
                     if Actions_pattern == 3:
                         f = open("./Plan/Break.txt", "r")
-                        Arr = eval(f.read().replace("\n",""))
+                        Arr = eval(f.read())
                         f.close()
                         f = open("./Plan/Break.txt", "w")
                     
                     for r in Selected_Rect:
                         Arr[r[1]][r[0]] = 1
-                    f.write("[" + "\n")
-                    for ii in Arr:
-                        f.write(str(ii) + ",\n")
-                    f.write("]")
+                    f.write(str(Arr))
                     f.close()
                     
                     Selected_Rect = []
@@ -306,6 +294,6 @@ pygame.quit()
 # How to Read Plan File
 """
     f = open("./Plan/Break.txt", "r")
-    Arr = eval(f.read().replace("\n",""))
+    Arr = eval(f.read())
     f.close()
 """

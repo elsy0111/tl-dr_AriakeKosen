@@ -82,7 +82,7 @@ def captureField_struct(W, H, WS, field, field2, fileName):
         # print()
     drawGrids(W, H, WS)
     pygame.image.save(WS, fileName)
-    pygame.image.save(WS, fileName + ".png")
+    # pygame.image.save(WS, fileName + ".png")
 
 def captureField_area(W, H, WS, field0, field, field2, fileName):
     for i in range(H):
@@ -115,7 +115,7 @@ def captureField_area(W, H, WS, field0, field, field2, fileName):
         # print()
     drawGrids(W, H, WS)
     pygame.image.save(WS, fileName)
-    pygame.image.save(WS, fileName + ".png")
+    # pygame.image.save(WS, fileName + ".png")
 
 def main():
     print("Image_Generating...")
