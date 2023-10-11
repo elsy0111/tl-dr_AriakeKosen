@@ -1,10 +1,11 @@
 import numpy as np 
-import copy
 import random
 
 class State:
-    def __init__(self,width,height,end_turn,ike=[],shiro=[],first_shokunin=[],second_shokunin=[],joheki_coef=10,zinchi_coef=30,shiro_coef=100) -> None:
-
+    def __init__(self,width,height,end_turn,ike=[],shiro=[],first_shokunin=[],second_shokunin=[],coef=(10,30,100)) -> None:
+        
+        self.save=first_shokunin,second_shokunin
+        
         #フィールドサイズ
         self.WIDTH=width    #11-25
         self.HEIGHT=height  #11-25
@@ -15,7 +16,7 @@ class State:
         
         #ターン
         self.turn=1
-        self.end_turn=end_turn
+        self.END_TURN=end_turn
 
         #以下 False(0):1st True(1):2nd
         
@@ -29,12 +30,13 @@ class State:
         #陣地の座標
         self.closed_zinchi=[set(),set()]
         self.opened_zinchi=[set(),set()]
-        self.visited=[set(),set()]
+        
+        self.visited=set()
 
         #各ポイント係数
-        self.JOHEKI_COEF=joheki_coef
-        self.ZINCHI_COEF=zinchi_coef
-        self.SHIRO_COEF=shiro_coef
+        self.JOHEKI_COEF=coef[0]
+        self.ZINCHI_COEF=coef[1]
+        self.SHIRO_COEF=coef[2]
         
         #フィールドの外周の座標 find_zinchi()に使用
         self.OUTSIDE=set()
@@ -44,6 +46,9 @@ class State:
                     self.OUTSIDE.add((i,j))
         self.OUTSIDE=frozenset(self.OUTSIDE)
     
+    def reset(self):
+        self.__init__(self.WIDTH,self.HEIGHT,self.END_TURN,self.IKE,self.SHIRO,self.save[False],self.save[True],coef=(self.JOHEKI_COEF,self.ZINCHI_COEF,self.SHIRO_COEF))
+     
     def __str__(self):
         count=self.count()
         score=self.score()
@@ -115,11 +120,11 @@ class State:
             "1st:{}".format(",".join(f"({i[0]},{i[1]})" for i in self.shokunin[False])),
             "2nd:{}".format(",".join(f"({i[0]},{i[1]})" for i in self.shokunin[True])),
             "score".ljust(60,"-"),
-            "    "+text_format('center',SCORE_WIDTH,"/"," ",f"joheki(x{self.JOHEKI_COEF})",f"zinchi(x{self.ZINCHI_COEF})",f"shiro(x{self.SHIRO_COEF})","total","evaluate"),
+            "    "+text_format('center',SCORE_WIDTH,"/"," ",f"joheki(x{self.JOHEKI_COEF})",f"zinchi(x{self.ZINCHI_COEF})",f"shiro(x{self.SHIRO_COEF})","total"),
             "1st:"+text_format('center',SCORE_WIDTH,"/"," ",f"{count[False][0]}({score[False][0]})",
-                               f"{count[False][1]}({score[False][1]})",f"{count[False][2]}({score[False][2]})",f"{sum(score[False])}",f"{self.evaluate(False):+}"),
+                               f"{count[False][1]}({score[False][1]})",f"{count[False][2]}({score[False][2]})",f"{sum(score[False])}"),
             "2nd:"+text_format('center',SCORE_WIDTH,"/"," ",f"{count[True][0]}({score[True][0]})",
-                               f"{count[True][1]}({score[True][1]})",f"{count[True][2]}({score[True][2]})",f"{sum(score[True])}",f"{self.evaluate(True):+}"),
+                               f"{count[True][1]}({score[True][1]})",f"{count[True][2]}({score[True][2]})",f"{sum(score[True])}"),
             text_format('left',1+2*self.WIDTH+int(self.HEIGHT>10)," "*3,"-","shokunin","joheki","zinchi"),
             text_format(None,None," "*3,None,head1,head1,head1) if self.WIDTH>10 else "",
             text_format(None,None," "*3,None,head2,head2,head2),
@@ -170,7 +175,7 @@ class State:
     def legal_move(self,team,number,target=None):
         cie=self.to_8cie(self.shokunin[team][number])
         
-        #行動条件:(1)周囲8方向であること　かつ(2)池,(3)相手チームの城壁,(4)(5)両チームの職人へは移動不可
+        #! 行動条件:(1)周囲8方向　Not (2)池,(3)相手チームの城壁,(4)(5)両チームの職人へは移動不可(6)盤内
         cond=self.IKE | self.joheki[not team] | set(self.shokunin[False]) | set(self.shokunin[True])
         if target is None:
             able=[]
@@ -185,7 +190,7 @@ class State:
     def legal_build(self,team,number,target=None):
         cie=self.to_4cie(self.shokunin[team][number])
         
-        #行動条件:(1)周囲4方向であること　かつ(2)城,(3)相手チームの城壁,(4)相手チームの職人へは建築不可
+        #! 行動条件:(1)周囲4方向　Not (2)城,(3)相手チームの城壁,(4)相手チームの職人へは建築不可 (5)盤内
         cond=self.SHIRO | self.joheki[not team] | set(self.shokunin[not team])
         if target is None:
             able=[]
@@ -200,7 +205,7 @@ class State:
     def legal_destory(self,team,number,target=None):
         cie=self.to_4cie(self.shokunin[team][number])
         
-        #行動条件:(1)周囲4方向であること　かつ(2)どちらかのチームの城壁がある場合のみ破壊可
+        #! 行動条件:(1)周囲4方向であること　かつ(2)どちらかのチームの城壁がある場合のみ破壊可 (3)盤内
         cond=self.joheki[False] | self.joheki[True]
         able=[]
         if target is None:
@@ -248,8 +253,8 @@ class State:
 
     #四方に隣接,連結した城壁を探索(深さ優先探索)
     def dfs_4(self,team,x,y):
-        if 0<=x<=self.WIDTH and 0<=y<=self.HEIGHT and not (x,y) in (self.visited[team] | self.joheki[team]):
-            self.visited[team].add((x,y))
+        if 0<=x<=self.WIDTH and 0<=y<=self.HEIGHT and not (x,y) in (self.visited | self.joheki[team]):
+            self.visited.add((x,y))
             connect={(x,y)}
             #右下左上の順(4つ)
             connect.update(self.dfs_4(team,x+1,y))
@@ -261,8 +266,8 @@ class State:
             return set()
     
     def dfs_8(self,team,x,y):
-        if 0<=x<=self.WIDTH and 0<=y<=self.HEIGHT and (x,y) in self.joheki[team] and not (x,y) in self.visited[team]:
-            self.visited[team].add((x,y))
+        if 0<=x<=self.WIDTH and 0<=y<=self.HEIGHT and (x,y) in self.joheki[team] and not (x,y) in self.visited:
+            self.visited.add((x,y))
             connect={(x,y)}
             #左上～右下の順(8つ)
             connect.update(self.dfs_8(team,x-1,y-1))
@@ -287,7 +292,7 @@ class State:
                     dfs_tmp=self.dfs_4(team,i,j)
                     if dfs_tmp.isdisjoint(self.OUTSIDE):
                         closed_zinchi_tmp[team].update(dfs_tmp)
-            self.visited[team].clear()
+            self.visited.clear()
         #前ターンのclosed_zinchiとclosed_zinchi_tmpさらにjoheki[自チーム]を比較しopened_zinchiに格納
         #closed_zinchiにclosed_zinchi_tmpを代入
         #opened_zinchiからjoheki[相手チーム],closed_zinchi_tmp[相手チーム]を引く
@@ -303,7 +308,7 @@ class State:
             for x in range(self.WIDTH):
                 for y in range(self.HEIGHT):
                     connected_joheki[team].append(len(self.dfs_8(team,x,y)))
-            self.visited[team].clear()
+            self.visited.clear()
         return connected_joheki
     
     #############################################################################################################################
@@ -370,7 +375,7 @@ class State:
     
     #ゲーム終了か判定
     def is_done(self):
-        return self.turn>=self.end_turn
+        return self.turn>=self.END_TURN
     
     #現在が先攻のターンか判定
     def is_first_player(self):
@@ -390,79 +395,16 @@ class State:
             result=[0]+list_add(self.legal_move(team,number),1)+list_add(self.legal_build(team,number),9)+list_add(self.legal_destory(team,number),13)
         return result
 
-    def legal_actions_for_model(self,team=None,number=None):
-        if team is None:
-            team=self.turn%2==1
-        if number is None:
-            result=np.zeros((len(self.shokunin[team]),16))
-            for i in range(len(self.shokunin[team])):
-                for j in self.legal_move(team,i):
-                    result[i][j]=1
-                for j in self.legal_build(team,i):
-                    result[i][j+8]=1
-                for j in self.legal_destory(team,i):
-                    result[i][j+12]=1
-            return result
-        else:
-            result=np.zeros((16,))
-            for j in self.legal_move(team,number):
-                result[j]=1
-            for j in self.legal_build(team,number):
-                result[j+8]=1
-            for j in self.legal_destory(team,number):
-                result[j+12]=1
-            return result     
-         
-    #評価関数
-    def evaluate(self,team=None):
-        if team is None:
-            team=self.turn%2==1
-        result=0
-        score=self.score()
-        result+=sum(score[team])-sum(score[not team])
-        connested_joheki=self.find_connected_joheki()
-        result+=sum([i**2 for i in connested_joheki[team]])-sum([i**2 for i in connested_joheki[not team]])
-        return result
-            
     #現在の盤の状態を返す
     def state(self):
         return self.shokunin,self.joheki,self.closed_zinchi,self.opened_zinchi
-    
-    def state_for_model(self,team,shokunin):
-        result=np.zeros((self.HEIGHT,self.WIDTH,7))
-        for y in range(self.HEIGHT):
-            for x in range(self.WIDTH):
-                flg=False
-                if (x,y) in self.IKE:
-                    result[y][x][1]=0.5
-                    flg=True
-                if (x,y) in self.SHIRO:
-                    result[y][x][2]=0.5
-                    flg=True
-                if (x,y) in self.shokunin[False]:
-                    result[y][x][3]=0.5
-                    flg=True
-                if (x,y) in self.shokunin[True]:
-                    result[y][x][4]=0.5
-                    flg=True
-                if (x,y) in self.joheki[False]:
-                    result[y][x][5]=0.5
-                    flg=True
-                if (x,y) in self.joheki[True]:
-                    result[y][x][6]=0.5
-                    flg=True
-                if not flg:
-                    result[y][x][0]=0.5
-        x,y=self.shokunin[team][shokunin]
-        result[y][x][4 if team else 3]=1
-        return result
         
 #本番で用いられる18種類の競技フィールドをから選んで生成  
 def generate_board(id,turn=200,coef=(10,30,100)):
     """'A11','A13','A15','A17','A21','A25','B11','B13','B15','B17','B21','B25','C11','C13','C15','C17','C21','C25'"""
-    if id == 'list':
-        return ('A11','A13','A15','A17','A21','A25','B11','B13','B15','B17','B21','B25','C11','C13','C15','C17','C21','C25')
-    elif id == 'A11':
+    if id == 'random':
+        id=random.choice(('A11','A13','A15','A17','A21','A25','B11','B13','B15','B17','B21','B25','C11','C13','C15','C17','C21','C25'))
+    if id == 'A11':
         width=11
         height=11
         ike=[(5, 0), (4, 1), (6, 1), (4, 2), (6, 2), (3, 3), (7, 3), (1, 4), (2, 4), (8, 4), (9, 4), (0, 5), (10, 5), (1, 6), (2, 6), (8, 6), (9, 6), (3, 7), (7, 7), (4, 8), (6, 8), (4, 9), (6, 9), (5, 10)]
@@ -606,8 +548,7 @@ def generate_board(id,turn=200,coef=(10,30,100)):
         first_shokunin=[(19, 1), (16, 2), (13, 3), (3, 13), (2, 16), (1, 19)]
         second_shokunin=[(23, 5), (22, 8), (21, 11), (11, 21), (8, 22), (5, 23)]
     
-    joheki_coef,zinchi_coef,shiro_coef=coef
-    return State(width,height,turn,ike,shiro,first_shokunin,second_shokunin,joheki_coef=joheki_coef,zinchi_coef=zinchi_coef,shiro_coef=shiro_coef)
+    return State(width,height,turn,ike,shiro,first_shokunin,second_shokunin,coef)
 
 #width,height内に収まるランダムな座標タプルを生成
 def random_cie(width,height,args): 
@@ -666,6 +607,7 @@ def playout(id,turn=200,coef=(10,30,100)):
     print(f"False_cnt:{cnt}")
     print(f"LegalAction_ave:{np.average(np.array(legal_cnt))}")
 
+            
 #ランダム対戦
 def main1():
     from time import time
@@ -683,9 +625,18 @@ def main3():
     print(x:=generate_board('A13',turn=200))
     print(x.legal_actions_for_model(False))
     print(x.legal_actions(False))
+
+def main4():
+    state=generate_board('A11')
+    print(state)
+    for _ in range(50):
+        state.next(random_action(state))
+    print(state)
+    state.reset()
+    print(state)
     
 if __name__ == '__main__':
-    main1()
+    main4()
 
 '''
 Stateクラスの説明

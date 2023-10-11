@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as stc
 from copy import deepcopy as dc
 from datetime import datetime
 from PIL import Image
@@ -10,6 +11,7 @@ from random import randint
 
 import requests as rq
 import json
+
 
 # url = "https://www.procon.gr.jp/"
 url = "http://127.0.0.1:3000/"
@@ -266,6 +268,10 @@ if "turnSeconds" not in st.session_state:
     # int
     st.session_state.turnSeconds = None
 
+if "SIZE" not in st.session_state:
+    # int
+    st.session_state.SIZE = 0
+
 def page1():
     st.title("GET_Matches")
 
@@ -342,6 +348,7 @@ def page2():
             try:
                 st.session_state.res_fmt2 = simple_get_matching(st.session_state.res2)
                 st.session_state.logs2 = st.session_state.res2["logs"]
+                st.session_state.SIZE = st.session_state.res2["board"]["width"]
             except:
                 st.session_state.status_code2 = 400
                 st.session_state.logs2 = None
@@ -608,8 +615,8 @@ def page4():
                 except:
                     self.status_code4 = 400
                     self.turn4 = None
-                    self.vis_struct_mason = Image.open("./img/None.png")
-                    self.vis_wall_territories = Image.open("./img/None.png")
+                    # self.vis_struct_mason = Image.open("./img/None.png")
+                    # self.vis_wall_territories = Image.open("./img/None.png")
                 if self.c:
                     try:
                         self.turn4 = self.res4["turn"]
@@ -632,8 +639,8 @@ def page4():
                     except:
                         self.status_code4 = 400
                         self.turn4 = None
-                        self.vis_struct_mason = Image.open("./img/None.png")
-                        self.vis_wall_territories = Image.open("./img/None.png")
+                        # self.vis_struct_mason = Image.open("./img/None.png")
+                        # self.vis_wall_territories = Image.open("./img/None.png")
                 
 
     # Get_Matching (Auto_Reload) ==============================================
@@ -896,7 +903,7 @@ def page6():
                     self.res_fmt6_1 = {
                         "operation Get_Matching" : {
                             "params" : 'id', 
-                            "error" : "field required"
+                            "error"  : "field required"
                             }
                     }
                     self.turn6 = -1
@@ -914,7 +921,7 @@ def page6():
                     self.res6_2 = {
                             "operation Post_Actions" : {
                                     "params" : 'turn', 
-                                    "error" : "its opponent turn. not your turn"
+                                    "error"  : "its opponent turn. not your turn"
                                 }
                             }
                     self.post6 = None
@@ -989,7 +996,114 @@ def page6():
             # placeholder.write("Turn :", worker.turn4)
             time.sleep(1)
 
+def page7():
+    st.title("Operate")
+    stc.html("""
+        <html>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(var(--n), 1fr);
+            gap: 10px;
+        }
+
+        .grid-item {
+            width: 100%;
+            padding-bottom: 100%;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        </style>
+        </head>
+        <body>
+
+        <div id="grid-container"></div>
+
+        <script>
+        const N = 10; // ここでNの値を設定
+
+        const gridContainer = document.getElementById('grid-container');
+
+        for (let i = 0; i < N; i++) {
+            for (let j = 0; j < N; j++){
+                console.log(i,j);
+                const gridItem = document.createElement('div');
+                gridItem.classList.add('grid-item');
+                gridItem.style.backgroundImage = url('./Field_Data/visualized_wall_territories.png.png'); // 画像のファイル名を適切に変更
+                gridContainer.appendChild(gridItem);
+            }
+        }
+
+        // CSSカスタムプロパティを使用してNの値を渡す
+        gridContainer.style.setProperty('--n', N);
+        </script>
+
+        </body>
+        </html>
+
+        """)
+
+    # Init ==================================================================
+
+    # Get_Matching (Auto_Reload) ==============================================
+
+    # Get_Matching = st.button("Auto Reload")
+    # if Get_Matching:
+    #     print("\nGet_Matching ===========================")
+    #     c = False
+    #     st.session_state.dt_now4 = datetime.now()
+    #     try:
+    #         st.session_state.res4, st.session_state.status_code4 = get_matching(st.session_state.ID)
+    #         c = True
+    #     except:
+    #         st.session_state.status_code4 = 400
+    #         st.session_state.turn4 = None
+    #         st.session_state.vis_struct_mason = Image.open("./img/None.png")
+    #         st.session_state.vis_wall_territories = Image.open("./img/None.png")
+    #     if c:
+    #         try:
+    #             st.session_state.turn4 = st.session_state.res4["turn"]
+    #             f = open("./Field_Data/Field_Structures.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["structures"]))
+    #             f.close()
+    #             f = open("./Field_Data/Field_Masons.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["masons"]))
+    #             f.close()
+    #             f = open("./Field_Data/Field_Walls.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["walls"]))
+    #             f.close()
+    #             f = open("./Field_Data/Field_Territories.txt","w")
+    #             f.write(str(st.session_state.res4["board"]["territories"]))
+    #             f.close()
+    #             vis.main()
+    #             st.session_state.vis_struct_mason = Image.open("./Field_Data/visualized_struct_masons.png")
+    #             st.session_state.vis_wall_territories = Image.open("./Field_Data/visualized_wall_territories.png")
+    #         except:
+    #             st.session_state.status_code4 = 400
+    #             st.session_state.turn4 = None
+    #             st.session_state.vis_struct_mason = Image.open("./img/None.png")
+    #             st.session_state.vis_wall_territories = Image.open("./img/None.png")
+
+    st.text_input("ID", key="ID")
+    # st.session_state.SIZE = 25
+    st.write("H (W) :", st.session_state.SIZE)
+    col = st.columns(st.session_state.SIZE)
+
+    A2 = st.checkbox("2")
+    if A2:
+        st.write("A2")
+    for i in range(st.session_state.SIZE):
+        for j in range(st.session_state.SIZE):
+            col[i].checkbox("_", key=str(i) + " " + str(j))
 
 pages = dict(
     page1="Get_Matches",
@@ -997,12 +1111,21 @@ pages = dict(
     page3="Post_Actions",
     page4="Visualizer",
     page5="Greedy?Random",
-    page6="Greedy?Random B"
+    page6="Greedy?Random B", 
+    page7="Operate"
 )
 
 page_id = st.sidebar.selectbox( # st.sidebar.*でサイドバーに表示する
     "Change",
-    ["page1", "page2", "page3", "page4", "page5", "page6"],
+    [
+     "page1",
+     "page2", 
+     "page3", 
+     "page4", 
+     "page5", 
+     "page6", 
+     "page7"
+     ],
     format_func=lambda page_id: pages[page_id], # 描画する項目を日本語に変換
 )
 
@@ -1023,3 +1146,6 @@ if page_id == "page5":
 
 if page_id == "page6":
     page6()
+
+if page_id == "page7":
+    page7()
