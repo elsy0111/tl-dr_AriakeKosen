@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+import random_action_ as random_greedy
 
 #const ======================================================
 H = 11
@@ -284,6 +285,7 @@ while running:
                     f.close()
                     
                     Selected_Rect = []
+                random_greedy.run()
         else:
             None
 
