@@ -4,12 +4,11 @@
 #include <ctime>
 #include <cstdlib>
 #include <map>
-#include <random>
 
 const int h = 8;
 const int w = 8;
 const int n = 2;
-int min_turn = 20;
+int min_turn = 30;
 
 int t = 0;
 int cnt = 0;
@@ -98,11 +97,7 @@ int move_able_random(std::pair<int, int> point) {
 }
 
 int main() {
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<int> distribution(1, 100);
-    double randomReal = distribution(generator);
-    srand((int)randomReal);
+    srand(time(0));
     time_t start = time(0);
 
     while (cnt < 10000) {
@@ -176,17 +171,17 @@ int main() {
         if (t < min_turn) {
             min_turn = t;
             min_log_li = log_li;
-            // std::cout << min_turn << std::endl;
+            std::cout << min_turn << std::endl;
         }
     }
     std::cout << "min_turn : " << min_turn << std::endl;
 
-    // for (int mason = 0; mason < n; ++mason){
-    //     for (int i = 0; i < min_log_li[mason].size(); ++i) {
-    //         std::cout << min_log_li[mason][i] << " ";
-    //     }
-    // }
-    // std::cout << std::endl;
+    for (int mason = 0; mason < n; ++mason){
+        for (int i = 0; i < min_log_li[mason].size(); ++i) {
+            std::cout << min_log_li[mason][i] << " ";
+        }
+	}
+    std::cout << std::endl;
 
     time_t end = time(0);
     // std::cout << "took: " << end - start << " seconds" << std::endl;
