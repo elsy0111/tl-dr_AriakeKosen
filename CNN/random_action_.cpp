@@ -6,6 +6,8 @@
 #include <map>
 #include <random>
 
+using namespace std; 
+
 const int h = 8;
 const int w = 8;
 const int n = 2;
@@ -14,22 +16,22 @@ int min_turn = 50;
 int t = 0;
 int cnt = 0;
 
-std::vector<std::pair<int, int>> masons_point = {{0, 5}, {3, 4}};
-std::set<std::pair<int, int>> masons_point_before(masons_point.begin(), masons_point.end());
-std::vector<int> masons_que(n, 0);
+vector<pair<int, int>> masons_point = {{0, 5}, {3, 4}};
+set<pair<int, int>> masons_point_before(masons_point.begin(), masons_point.end());
+vector<int> masons_que(n, 0);
 
-std::vector<std::pair<int, int>> direction_dict = {
+vector<pair<int, int>> direction_dict = {
     {-1, -1}, {-1, 0}, {-1, 1}, {0, 1},
     {1, 1}, {1, 0}, {1, -1}, {0, -1},
 };
 
-std::map<int, int> move_break_dict = {{1, 12}, {3, 13}, {5, 14}, {7, 15}};
-std::map<int, int> build_break_dict = {{8, 12}, {9, 13}, {10, 14}, {11, 15}};
+map<int, int> move_break_dict = {{1, 12}, {3, 13}, {5, 14}, {7, 15}};
+map<int, int> build_break_dict = {{8, 12}, {9, 13}, {10, 14}, {11, 15}};
 
-std::vector<std::vector<int>> log_li(n, std::vector<int>());
-std::vector<std::vector<int>> min_log_li;
+vector<vector<int>> log_li(n, vector<int>());
+vector<vector<int>> min_log_li;
 
-std::vector<std::vector<int>> field_masons = {
+vector<vector<int>> field_masons = {
     {0, 0, 0, 0, 0, 1, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
@@ -40,7 +42,7 @@ std::vector<std::vector<int>> field_masons = {
     {0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-std::vector<std::vector<int>> field_walls = {
+vector<vector<int>> field_walls = {
     {0, 0, 0, 2, 0, 0, 0, 0},
     {0, 0, 0, 2, 0, 0, 0, 0},
     {0, 0, 0, 2, 0, 0, 0, 0},
@@ -51,7 +53,7 @@ std::vector<std::vector<int>> field_walls = {
     {0, 0, 0, 2, 0, 0, 0, 0}
 };
 
-std::vector<std::vector<int>> field_structures = {
+vector<vector<int>> field_structures = {
     {0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
@@ -62,7 +64,7 @@ std::vector<std::vector<int>> field_structures = {
     {0, 0, 1, 0, 0, 0, 0, 0}
 };
 
-bool move_able(std::pair<int, int> point, int d) {
+bool move_able(pair<int, int> point, int d) {
     int i = point.first + direction_dict[d].first;
     int j = point.second + direction_dict[d].second;
     if (!(0 <= i && i < h)) {
@@ -86,8 +88,8 @@ bool move_able(std::pair<int, int> point, int d) {
     return true;
 }
 
-int move_able_random(std::pair<int, int> point) {
-    std::vector<int> move_able_li;
+int move_able_random(pair<int, int> point) {
+    vector<int> move_able_li;
     for (int d = 0; d < 8; ++d) {
         if (move_able(point, d)) {
             move_able_li.push_back(d);
@@ -98,9 +100,9 @@ int move_able_random(std::pair<int, int> point) {
 }
 
 int main() {
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<int> distribution(1, 100);
+    random_device rd;
+    mt19937 generator(rd());
+    uniform_int_distribution<int> distribution(1, 100);
     double randomReal = distribution(generator);
     srand((int)randomReal);
     time_t start = time(0);
@@ -108,12 +110,12 @@ int main() {
     while (cnt < 10000) {
         cnt++;
         masons_point = {{0, 5}, {3, 4}};
-        masons_point_before = std::set<std::pair<int, int>>(masons_point.begin(), masons_point.end());
-        std::set<std::pair<int, int>> move_set = {{5, 5}, {3, 7}, {6, 1}};
-        std::set<std::pair<int, int>> build_set = {{1, 3}};
-        std::set<std::pair<int, int>> break_set = {{7, 3}};
+        masons_point_before = set<pair<int, int>>(masons_point.begin(), masons_point.end());
+        set<pair<int, int>> move_set = {{5, 5}, {3, 7}, {6, 1}};
+        set<pair<int, int>> build_set = {{1, 3}};
+        set<pair<int, int>> break_set = {{7, 3}};
         t = 0;
-        log_li = std::vector<std::vector<int>>(n, std::vector<int>());
+        log_li = vector<vector<int>>(n, vector<int>());
 
         while (!move_set.empty() || !build_set.empty() || !break_set.empty()) {
             if (t > min_turn) {
@@ -176,20 +178,20 @@ int main() {
         if (t < min_turn) {
             min_turn = t;
             min_log_li = log_li;
-            // std::cout << min_turn << std::endl;
+            // cout << min_turn << endl;
         }
     }
-    std::cout << "min_turn : " << min_turn << std::endl;
+    cout << "min_turn : " << min_turn << endl;
 
     // for (int mason = 0; mason < n; ++mason){
     //     for (int i = 0; i < min_log_li[mason].size(); ++i) {
-    //         std::cout << min_log_li[mason][i] << " ";
+    //         cout << min_log_li[mason][i] << " ";
     //     }
     // }
-    // std::cout << std::endl;
+    // cout << endl;
 
     time_t end = time(0);
-    // std::cout << "took: " << end - start << " seconds" << std::endl;
+    // cout << "took: " << end - start << " seconds" << endl;
 
     return 0;
 }
