@@ -236,6 +236,7 @@ def greedy_check_actions(Masons,Structures,Walls,H,W):
     print(actions_return) 
     return actions_return
 direc = [(-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)]
+
 convert_return = [[1,1],
                   [1,2],
                   [1,3],

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include <ctime>
+/* #include <ctime> */
 #include <cstdlib>
 #include <map>
 #include <random>
@@ -105,7 +105,7 @@ int main() {
     uniform_int_distribution<int> distribution(1, 100);
     double randomReal = distribution(generator);
     srand((int)randomReal);
-    time_t start = time(0);
+    /* time_t start = time(0); */
 
     while (cnt < 10000) {
         cnt++;
@@ -137,8 +137,8 @@ int main() {
                 if (field_walls[i][j] == 2) {
                     masons_que[mason]++;
                     log_li[mason].push_back(move_break_dict[move_d]);
-                    if (build_set.find({i, j}) != build_set.end()) {
-                        build_set.erase({i, j});
+                    if (break_set.find({i, j}) != build_set.end()) {
+                        break_set.erase({i, j});
                     }
                 }
                 log_li[mason].push_back(move_d);
@@ -190,7 +190,7 @@ int main() {
     // }
     // cout << endl;
 
-    time_t end = time(0);
+    /* time_t end = time(0); */
     // cout << "took: " << end - start << " seconds" << endl;
 
     return 0;

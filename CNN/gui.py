@@ -690,12 +690,12 @@ def page4():
     #             st.session_state.vis_wall_territories = Image.open("./img/None.png")
 
 
-    if st.button("Switch Auto ReloadA"):
-        st.session_state.Switch_Auto_Reload_5 = not st.session_state.Switch_Auto_Reload_5
-    st.write("A :",st.session_state.Switch_Auto_Reload_5)
-    if st.button("Switch Auto ReloadB"):
-        st.session_state.Switch_Auto_Reload_6 = not st.session_state.Switch_Auto_Reload_6
-    st.write("B :",st.session_state.Switch_Auto_Reload_6)
+    # if st.button("Switch Auto ReloadA"):
+    #     st.session_state.Switch_Auto_Reload_5 = not st.session_state.Switch_Auto_Reload_5
+    # st.write("A :",st.session_state.Switch_Auto_Reload_5)
+    # if st.button("Switch Auto ReloadB"):
+    #     st.session_state.Switch_Auto_Reload_6 = not st.session_state.Switch_Auto_Reload_6
+    # st.write("B :",st.session_state.Switch_Auto_Reload_6)
         
     st.text_input("ID", key="ID")
     Switch_Auto_Reload = st.button("Switch Auto Reload")

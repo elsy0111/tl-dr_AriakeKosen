@@ -115,7 +115,7 @@ while running:
             running = False
             
     try:
-        Field_image = pygame.transform.scale(pygame.image.load(r"Field_Data\visualized_wall_territories.png"), image_size)
+        Field_image = pygame.transform.scale(pygame.image.load(r"Field_Data\visualized_all.png"), image_size)
     except:
         None
     Field_image.set_alpha(90)
