@@ -7,7 +7,6 @@ import vis
 import lib
 import threading
 import time
-from random import randint
 
 import requests as rq
 import json
@@ -542,26 +541,25 @@ def page7():
                 self.is_first = self.res_get["first"]
                 if (self.turn_now + self.is_first) % 2:
                     print("POST")
-                    self.posted, self.res7, self.status_code7 = post_actions(self.ID, 
-                                                                            self.turn_now + 1, 
-                                                                            str(Send_Arr),self.is_first)
-                    if self.status_code7 == 200:
-                        print("200")
-                        self.accepted_turn = self.turn_now + 1
-                        if self.last_accepted_turn == -1:
-                            self.last_accepted_turn = self.accepted_turn
-                        self.dt_now7 = datetime.now()
-                        if self.last_accepted_turn != self.accepted_turn:
-                            f = open("./Plan/run.txt", "w")
-                            Arr_ = [[]for _ in range(self.mason)]
-                            for i in range(self.mason):
-                                Arr_[i] = Actions_Arr[i][1:]
-                            f.write(str(Arr_))
-                            f.close()
-                            self.last_accepted_turn = self.accepted_turn
-                            print("SEND!!!!!!!!!!")
-                        else:
-                            None
+
+                    if self.last_accepted_turn != self.accepted_turn:
+                        f = open("./Plan/run.txt", "w")
+                        Arr_ = [[]for _ in range(self.mason)]
+                        for i in range(self.mason):
+                            Arr_[i] = Actions_Arr[i][1:]
+                        f.write(str(Arr_))
+                        f.close()
+                        self.last_accepted_turn = self.accepted_turn
+                        print("SEND!!!!!!!!!!")
+                        self.posted, self.res7, self.status_code7 = post_actions(self.ID, 
+                                                                                self.turn_now + 1, 
+                                                                                str(Send_Arr),self.is_first)
+                        if self.status_code7 == 200:
+                            self.accepted_turn = self.turn_now
+                            print("200")
+                            if self.last_accepted_turn == -1:
+                                self.last_accepted_turn = self.accepted_turn
+                            self.dt_now7 = datetime.now()
 
                     
 

@@ -4,7 +4,15 @@ import random_action_ as random_greedy
 import delete_unleach
 
 #const ======================================================
-H = 11
+m_ = open("./Field_Data/Field_Masons.txt")
+m = eval(m_.read())
+H = len(m)
+masons = 0
+for i in range(H):
+    for j in range(H):
+        if m[i][j] > 0:
+            masons += 1
+m_.close()
 screen_width = 1300
 screen_height = 1000
 image_size = (900,900)
@@ -39,6 +47,7 @@ button_ac1 =   (1000,530,400,70)
 button_ac2 =   (1000,610,400,70)
 button_ac3 =   (1000,690,400,70)
 button_Run =   (950,800,300,100)
+button_aac =   (1150,200,300,100)
 
 rect_clear = pygame.Rect(*button_clear)
 txt_clear = font.render("Clear", True, (0, 0, 0))
@@ -68,6 +77,9 @@ txt_ac3 = font.render("Break", True, (0, 0, 0))
 rect_Run = pygame.Rect(*button_Run)
 txt_Run = fontL.render("Run", True, (0, 0, 0))
 
+rect_aac = pygame.Rect(*button_aac)
+txt_aac = font.render("ALL_Clear", True, (0, 0, 0))
+
 
 #func ========================================================
 def click_field(p):
@@ -96,6 +108,9 @@ def click_ac3(p):
 
 def click_run(p):
     return button_Run[0] <= p[0] < button_Run[0] + button_Run[2] and button_Run[1] <= p[1] < button_Run[1] + button_Run[3]
+
+def click_aac(p):
+    return button_aac[0] <= p[0] < button_aac[0] + button_aac[2] and button_aac[1] <= p[1] < button_aac[1] + button_aac[3]
 
 Select_image = pygame.transform.scale(pygame.image.load(r"img\select.png").convert_alpha(), (dots, dots))
 Move_image = pygame.transform.scale(pygame.image.load(r"img\select_move.png").convert_alpha(), (dots, dots))
@@ -154,6 +169,9 @@ while running:
 
     pygame.draw.rect(screen, (255, 0, 0), rect_Run)
     screen.blit(txt_Run, (button_Run[0] + 90, button_Run[1] + 8))
+
+    pygame.draw.rect(screen, (255, 0, 0), rect_aac)
+    screen.blit(txt_aac, (button_aac[0] + 90, button_aac[1] + 8))
 
     if Actions_pattern == 1:
         screen.blit(choice_image, (button_ac1[0] - 60, button_ac1[1] + 5))
@@ -219,6 +237,29 @@ while running:
             else:
                 past_mouse_position = mouse_position
                 Actions_pattern = 3
+        elif click_aac(mouse_position):
+            if mouse_position == past_mouse_position:
+                None
+            else:
+                past_mouse_position = mouse_position
+
+                f = open("./Plan/Move.txt", "w")
+                f.write(str(init_Arr))
+                f.close()
+                f = open("./Plan/Build.txt", "w")
+                f.write(str(init_Arr))
+                f.close()
+                f = open("./Plan/Break.txt", "w")
+                f.write(str(init_Arr))
+                f.close()
+
+                Selected_Rect = []
+                Selecting_Rect = []
+
+                f = open("./Plan/run.txt", "w")
+                
+                f.write(str())
+
         elif click_field(mouse_position):
             if mouse_position == past_mouse_position:
                 None
