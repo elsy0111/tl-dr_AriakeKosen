@@ -47,7 +47,7 @@ button_ac1 =   (1000,530,400,70)
 button_ac2 =   (1000,610,400,70)
 button_ac3 =   (1000,690,400,70)
 button_Run =   (950,800,300,100)
-button_aac =   (1150,200,300,100)
+button_aac =   (0,900,400,70)
 
 rect_clear = pygame.Rect(*button_clear)
 txt_clear = font.render("Clear", True, (0, 0, 0))
@@ -134,7 +134,7 @@ while running:
     try:
         Field_image = pygame.transform.scale(pygame.image.load(r"Field_Data\visualized_all.png"), image_size)
     except:
-        None
+        continue
     Field_image.set_alpha(90)
     screen.fill((200, 200, 200))
     screen.blit(Field_image,(0,0))
@@ -257,8 +257,9 @@ while running:
                 Selecting_Rect = []
 
                 f = open("./Plan/run.txt", "w")
-                
-                f.write(str())
+                A = [[] for _ in range(masons)]
+                f.write(str(A))
+                f.close()
 
         elif click_field(mouse_position):
             if mouse_position == past_mouse_position:
