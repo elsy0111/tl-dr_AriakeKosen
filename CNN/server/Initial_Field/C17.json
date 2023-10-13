@@ -10,7 +10,7 @@
         }
     ],
     "match": {
-        "id": "C17",
+        "id": 10,
         "turns": 200,
         "turnSeconds": 3,
         "bonus": {
