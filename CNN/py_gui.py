@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import random_action_ as random_greedy
+import delete_unleach
 
 #const ======================================================
 H = 11
@@ -285,7 +286,20 @@ while running:
                     f.close()
                     
                     Selected_Rect = []
-                random_greedy.run()
+                    
+                    delete_unleach.convert()
+                    random_greedy.run()
+
+                    f = open("./Plan/Move.txt", "w")
+                    f.write(str(init_Arr))
+                    f.close()
+                    f = open("./Plan/Build.txt", "w")
+                    f.write(str(init_Arr))
+                    f.close()
+                    f = open("./Plan/Break.txt", "w")
+                    f.write(str(init_Arr))
+                    f.close()
+
         else:
             None
 

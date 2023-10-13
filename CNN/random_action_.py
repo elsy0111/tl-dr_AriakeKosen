@@ -116,7 +116,7 @@ def run():
 
     masons_point_before = set(masons_point_cp)
 
-    while cnt < 50000:
+    while cnt < 10000:
         cnt += 1
         masons_point = dc(masons_point_cp)
         masons_point_before = set(masons_point)
@@ -163,7 +163,7 @@ def run():
                         log_li[mason].append(wall_d)
                         build_set.remove((i,j))
                     if (i,j) in break_set:
-                        if field_walls[i][j] == 2:
+                        if field_walls[i][j] != 0:
                             masons_que[mason] += 1
                             log_li[mason].append(wall_d + 4)
                             break_set.remove((i,j))
