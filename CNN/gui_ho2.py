@@ -10,7 +10,6 @@ import time
 import requests as rq
 import json
 
-p = 0
 
 # url = "https://www.procon.gr.jp/"
 url = "http://127.0.0.1:3000/"
@@ -22,7 +21,8 @@ is_accepted = [False for _ in range(201)]
 header = {"Content-Type" : "application/json",
         "procon-token" : api_token}
 
-def get_matches():
+
+def get_matches(First = True):
     """
     試合一覧取得API
     参加する試合の一覧を取得するAPIです
@@ -51,6 +51,12 @@ def get_matches():
                bool   first               自チームが先手かどうか
                ] }
     """
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     r = rq.get(url + "matches", headers = header)
     response = r.json()
     status_code = r.status_code
@@ -58,7 +64,7 @@ def get_matches():
     return response["matches"], status_code
 
 
-def get_matching(id : int):
+def get_matching(id : int,First = True):
     """
      res = get_matches()
      ID = res['id']
@@ -97,12 +103,18 @@ def get_matching(id : int):
 
                }
     """
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     r = rq.get(url + "matches/" + str(id), headers = header)
     response = r.json()
     status_code = r.status_code
     # print("get_matching   status_code :", r.status_code)
 
-    r_ = get_matches_id(id)
+    r_ = get_matches_id(id,First)
     response["first"] = r_["first"]
     response["opponent"] = r_["opponent"]
     response["turns"] = r_["turns"]
@@ -110,7 +122,7 @@ def get_matching(id : int):
 
     return response, status_code
 
-def post_actions(id : int, turn : int, actions_arr : list):
+def post_actions(id : int, turn : int, actions_arr : list, First = True):
 
     """
     行動計画更新API
@@ -126,6 +138,12 @@ def post_actions(id : int, turn : int, actions_arr : list):
               }                                         7 : 左下,  6 : 下　　, 5 : 右下)
     """
 
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     try:
         actions_arr = eval(actions_arr)
 
@@ -180,12 +198,18 @@ def list2json(actions : list):
     # print(j)
     return j
 
-def get_matches_id(id : int):
+def get_matches_id(id : int,First = True):
+    if First:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[0]}
+    else:
+        header = {"Content-Type" : "application/json",
+                "procon-token" : api_tokens[1]}
     r = rq.get(url + "matches", headers = header)
     response = r.json()
     for match in response["matches"]:
         if match.get("id") == int(id):
-            # status_code = r.status_code
+            status_code = r.status_code
             # print("get_matches_id status_code :", status_code)
             return match
     return -1
@@ -284,33 +308,12 @@ def page1():
         print("\n// Get_Matches ==================")
         st.session_state.dt_now1 = datetime.now()
         st.session_state.res1, st.session_state.status_code1 = get_matches()
-
-
-        st.session_state.is_first = st.session_state.res1[p]["first"]
-        st.session_state.size = st.session_state.res1[p]["board"]["width"]
-        st.session_state.mason = st.session_state.res1[p]["board"]["mason"]
-        st.session_state.turnSeconds = st.session_state.res1[p]["turnSeconds"]
-        st.session_state.opponent = st.session_state.res1[p]["opponent"]
-        st.session_state.turns = st.session_state.res1[p]["turns"]
-        st.session_state.ID = st.session_state.res1[p]["id"]
-
-        lib.convert_before_match(st.session_state.res1[p]["board"]["masons"], st.session_state.res1[p]["board"]["structures"])
         print("\n   Get_Matches ==================//")
 
     # Input / Output ========================================================
-    st.markdown(f"""
-                ## ID    : {st.session_state.ID}
-                ## First : {st.session_state.is_first}
-                ## Size  : {st.session_state.size}
-                ## Mason : {st.session_state.mason}
-                ## turnSeconds : {st.session_state.turnSeconds}
-                ## Opponent : {st.session_state.opponent}
-                ## Turns : {st.session_state.turns}
-                """)
 
     st.write("Status   :", st.session_state.status_code1, st.session_state.dt_now1)
     st.write("Raw      :", st.session_state.res1)
-
 
 def page2():
     st.title("Get_Matching")
@@ -369,7 +372,7 @@ def page2():
                 ## Turns : {st.session_state.turns}
                 """)
     # st.write("Raw :  ", st.session_state.res2)
-    # st.write("Simple : ", st.session_state.res2["logs"])
+    st.write("Simple : ", st.session_state.res2["logs"])
 
 def page4():
     st.title("Visualizer")
@@ -415,8 +418,20 @@ def page4():
                         cc += 1
                         try:
                             self.turn4 = self.res4["turn"]
-
-                            lib.convert(self.res4["board"]["masons"], self.res4["board"]["structures"],self.res4["board"]["walls"],self.res4["board"]["territories"],self.res4["first"])
+                            f = open("./Field_Data/Field_Structures.txt","w")
+                            f.write(str(self.res4["board"]["structures"]))
+                            f.close()
+                            f = open("./Field_Data/Field_Masons.txt","w")
+                            f.write(str(self.res4["board"]["masons"]))
+                            f.close()
+                            f = open("./Field_Data/Field_Walls.txt","w")
+                            f.write(str(self.res4["board"]["walls"]))
+                            f.close()
+                            f = open("./Field_Data/Field_Territories.txt","w")
+                            f.write(str(self.res4["board"]["territories"]))
+                            f.close()
+                            
+                            lib.convert(self.res4["first"])
                             vis.main()
                             self.scoreA, self.scoreB = lib.calculate()
 
@@ -546,7 +561,7 @@ def page7():
                         print("SEND!!!!!!!!!!")
                         self.posted, self.res7, self.status_code7 = post_actions(self.ID, 
                                                                                 self.turn_now + 1, 
-                                                                                str(Send_Arr))
+                                                                                str(Send_Arr),self.is_first)
                         if self.status_code7 == 200:
                             print("200")
                             self.dt_now7 = datetime.now()
@@ -618,7 +633,6 @@ id2action =  [[1,1],
               [3,8], 
               [0,0]]
 
-
 pages = dict(
     page1="Get_Matches",
     page2="Get_Matching",
@@ -626,24 +640,25 @@ pages = dict(
     page7="Run_Queue",
 )
 
-# 選択肢を縦に表示
-page_id = st.sidebar.radio(
+page_id = st.sidebar.selectbox( # st.sidebar.*でサイドバーに表示する
     "Change",
     [
-        "page1",
-        "page2",
-        "page4",
-        "page7",
-    ],
-    format_func=lambda page_id: pages[page_id],
+     "page1",
+     "page2", 
+     "page4", 
+     "page7", 
+     ],
+    format_func=lambda page_id: pages[page_id], # 描画する項目を日本語に変換
 )
 
-# 選択に応じてページを表示
 if page_id == "page1":
     page1()
-elif page_id == "page2":
+
+if page_id == "page2":
     page2()
-elif page_id == "page4":
+
+if page_id == "page4":
     page4()
-elif page_id == "page7":
+
+if page_id == "page7":
     page7()

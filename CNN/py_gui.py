@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-import random_action_ as random_greedy
+import random_action_
 import delete_unleach
 
 #const ======================================================
@@ -122,8 +122,8 @@ past_mouse_position = (-1,-1)
 Selected_Rect = []
 running = True
 
-fill_pattern = 1    # 0 : Non-Fill 1 : All-Fill 2 : check-Fill
-Actions_pattern = 1 # 1 ; Move 2 : Build 3 : Break
+fill_pattern = 0    # 0 : Non-Fill 1 : All-Fill 2 : check-Fill
+Actions_pattern = 2 # 1 ; Move 2 : Build 3 : Break
 
 Selecting_Rect = []
 while running:
@@ -330,7 +330,7 @@ while running:
                     Selected_Rect = []
                     
                     delete_unleach.convert()
-                    random_greedy.run()
+                    random_action_.run()
 
                     f = open("./Plan/Move.txt", "w")
                     f.write(str(init_Arr))

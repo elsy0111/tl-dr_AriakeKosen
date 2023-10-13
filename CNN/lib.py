@@ -280,6 +280,21 @@ def rev_Walls(Walls):
                 Rev_Walls[i].append(1)
     return Rev_Walls
 
+def rev_Territories(Territories):
+    H = W = len(Territories)
+    Rev_Territories = [[] for _ in range(H)]
+    for i in range(H):
+        for j in range(W):
+            if Territories[i][j] == 0:
+                Rev_Territories[i].append(0)
+            if Territories[i][j] == 1:
+                Rev_Territories[i].append(2)
+            if Territories[i][j] == 2:
+                Rev_Territories[i].append(1)
+            if Territories[i][j] == 3:
+                Rev_Territories[i].append(3)
+    return Rev_Territories
+
 def calc(Structures, Walls, Territories, H, W):
     scoreA = 0
     scoreB = 0
@@ -303,9 +318,9 @@ def calc(Structures, Walls, Territories, H, W):
 
 def calculate():
     try:
-        s_ = open("./Field_Data/Field_Structures.txt")
-        w_ = open("./Field_Data/Field_Walls.txt")
-        t_ = open("./Field_Data/Field_Territories.txt")
+        s_ = open("./Field_Data/Field_Structures.txt","r")
+        w_ = open("./Field_Data/Field_Walls.txt","r")
+        t_ = open("./Field_Data/Field_Territories.txt","r")
         s = eval(s_.read())
         w = eval(w_.read())
         t = eval(t_.read())
@@ -315,22 +330,63 @@ def calculate():
         None
 
 
-def main(Bool = True):
-    try:
-        m_ = open("./Field_Data/Field_Masons.txt")
-        s_ = open("./Field_Data/Field_Structures.txt")
-        w_ = open("./Field_Data/Field_Walls.txt")
-        m = eval(m_.read())
-        s = eval(s_.read())
-        w = eval(w_.read())
-        if not Bool:
-            m = rev_Masons(m)
-            w = rev_Walls(w)
-        H = W = len(m)
+def convert(m,s,w,t,Bool):
+    # try:
+    if 1:
+        s_ = open("./Field_Data/Field_Structures.txt","w")
+        t_ = open("./Field_Data/Field_Territories.txt","w")
+
+        m_ = open("./Field_Data/Field_Masons.txt","w")
+        w_ = open("./Field_Data/Field_Walls.txt","w")
+
+        # if Bool == False:
+        #     print("REVERSE")
+        #     m = rev_Masons(m)
+        #     w = rev_Walls(w)
+        #     t = rev_Territories(t)
+
+        m_.write(str(m))
+        m_.close()
+
+        w_.write(str(w))
+        w_.close()
+
+        s_.write(str(s))
+        s_.close()
+
+        t_.write(str(t))
+        t_.close()
+        print("converted!")
         # return legal_actions(m,s,w,H,W)
         # return greedy_actions(m,s,w,H,W)
-        return greedy_check_actions(m, s, w, H, W)
-    except:
-        None
+    # except:
+    #     None
 
 # main()
+
+def convert_before_match(m,s):
+    # try:
+    if 1:
+        s_ = open("./Field_Data/Field_Structures.txt","w")
+
+        m_ = open("./Field_Data/Field_Masons.txt","w")
+
+        # if Bool == False:
+        #     print("REVERSE")
+        #     m = rev_Masons(m)
+        #     w = rev_Walls(w)
+        #     t = rev_Territories(t)
+
+        m_.write(str(m))
+        m_.close()
+
+
+        s_.write(str(s))
+        s_.close()
+
+        print("converted!")
+        # return legal_actions(m,s,w,H,W)
+        # return greedy_actions(m,s,w,H,W)
+    # except:
+    #     None
+

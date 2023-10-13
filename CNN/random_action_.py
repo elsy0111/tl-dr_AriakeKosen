@@ -21,6 +21,7 @@ direc4_break_dict = {
                    7:15
                    }
 
+
 def move_able(point,d, masons_point_before, field_masons, field_structures, field_walls, h, w):
     i = point[0] + direction_dict[d][0]
     j = point[1] + direction_dict[d][1]
@@ -28,7 +29,7 @@ def move_able(point,d, masons_point_before, field_masons, field_structures, fiel
         return False
     if not (0<=j and j<w):
         return False
-    if field_masons[i][j] != 0:
+    if field_masons[i][j] < 0:
         return False
     if field_walls[i][j] == 2 and d%2==0:
         return False
@@ -43,7 +44,11 @@ def move_able_random(point, masons_point_before, field_masons, field_structures,
     for d in range(8):
         if move_able(point,d, masons_point_before, field_masons, field_structures, field_walls, h, w):
             move_able_li.append(d)
-    return move_able_li[randint(0,len(move_able_li)-1)]
+    try:
+        return move_able_li[randint(0,len(move_able_li)-1)]
+    except:
+        # move_able_li == []
+        return -1
 
 def run():
 
@@ -53,16 +58,23 @@ def run():
     n = 0
     f = open("Field_Data/Field_Masons.txt", "r")
     field_masons = eval(f.read())
-    masons_point_cp = []
-    masons_que = []
     w = h = len(field_masons)
-    min_turn = h * w * 2
+    for i in field_masons:
+        print(i)
+    #! min_turn = h * w * 2
+    min_turn = 30
     for i in range(h):
         for j in range(w):
             if field_masons[i][j] > 0:
                 n += 1
-                masons_que.append(0)
-                masons_point_cp.append((i, j))
+
+    masons_point_cp = [[] for _ in range(n)]
+    masons_que = [[] for _ in range(n)]
+    for i in range(h):
+        for j in range(w):
+            if field_masons[i][j] > 0:
+                masons_que[field_masons[i][j] - 1] = 0
+                masons_point_cp[field_masons[i][j] - 1] = (i, j)
     f.close()
 
     log_li = [[] for _ in range(n)]
@@ -113,13 +125,10 @@ def run():
     for i in Plan_break_list:
         print(i)
 
-
-    masons_point_before = set(masons_point_cp)
-
-    while cnt < 10000:
+    while cnt < 50000:
         cnt += 1
         masons_point = dc(masons_point_cp)
-        masons_point_before = set(masons_point)
+        masons_point_before = set(masons_point_cp)
         move_set = dc(Plan_move_set)
         build_set = dc(Plan_build_set)
         break_set = dc(Plan_break_set)
@@ -134,6 +143,9 @@ def run():
                     continue
                 
                 move_d = move_able_random(masons_point[mason], masons_point_before, field_masons, field_structures, field_walls, h, w) #0~7
+                if move_d == -1:
+                    print("ERRRRRR")
+                    continue
                 masons_point_before.remove((masons_point[mason][0], masons_point[mason][1]))
                 masons_point[mason] = (masons_point[mason][0] + direction_dict[move_d][0], 
                                        masons_point[mason][1] + direction_dict[move_d][1])
