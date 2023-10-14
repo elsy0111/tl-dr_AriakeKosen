@@ -11,6 +11,7 @@ import simple_make_around
 import clear_
 import requests as rq
 import json
+from random import randint
 
 p = 0
 
@@ -524,11 +525,15 @@ def page7():
         def run(self):
             while not self.should_stop.wait(0):
                 try:
-                    print(datetime.now())
-                    time.sleep(1)
-                    # print("\n //Auto Posting ===========================")
+                    # print(datetime.now())
+                    time.sleep(0.5)
+                    print("\n //Auto Posting ===========================")
                     f = open("./Plan/run.txt", "r")
-                    Actions_Arr = eval(f.read())
+                    try:
+                        Actions_Arr = eval(f.read())
+                    except:
+                        Actions_Arr = [[] for _ in range(self.mason)]
+                        
                     f.close()
                     Send_Arr = [[] for _ in range(self.mason)]
                     print(Actions_Arr)
@@ -538,16 +543,21 @@ def page7():
                         if len(Actions_Arr[i]) > 0:
                             Send_Arr[i] = id2action[Actions_Arr[i][0]]
                         else:
-                            Send_Arr[i] = id2action[16]
-
+                            print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+                            legal_actions = lib.random_move()
+                            Send_Arr[i] = legal_actions[i][randint(0,len(legal_actions[i])-1)]
                     print(Send_Arr)
                     self.res_get, self.status_code_get = get_matching(self.ID)
                     self.turn_now = self.res_get["turn"]
                     if self.latest_turn != self.turn_now:
                         print("FGO")
-                        clear_.run()
-                        simple_shortest.run()
-                        simple_make_around.run()
+                        try:
+                            clear_.run()
+                            simple_shortest.run()
+                            simple_make_around.run()
+                            print("ALLLLLLLLLLLLLLLLLLGGGGGGGGGGOOOOOOOOO\n\n\n\n\n\n")
+                        except:
+                            None
                         self.latest_turn = self.turn_now
                     self.is_first = self.res_get["first"]
                     if (self.turn_now + self.is_first) % 2:
@@ -570,7 +580,7 @@ def page7():
                                 is_accepted[self.turn_now] = 1
 
                 except:
-                    continue
+                    None
 
     st.markdown(f"""
                 ## ID : {st.session_state.ID}

@@ -1,7 +1,7 @@
-from collections import deque
 # import numpy as np
 
 def run():
+    from collections import deque
     # READ FIELD
     field_Masons = open("./Field_Data/Field_Masons.txt","r")
     field_Walls = open("./Field_Data/Field_Walls.txt","r")

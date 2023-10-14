@@ -57,22 +57,22 @@ def legal_actions(Masons,Structures,Walls,H,W):
                     if not next_position in Masons_Other_positions_set:
                         if not next_position in Walls_Your_positions_set:
                             actions[Mason_id - 1].append(id)
-        for i in range(4):
-            next_position = (Masons_positions[Mason_id][0] + direc[i * 2 + 1][0],Masons_positions[Mason_id][1] + direc[i * 2 + 1][1])
-            id = i + 8
-            if inside_board(next_position,H,W):
-                if not next_position in Castle_positions_set:
-                    if not next_position in (Walls_My_positions_set | Walls_Your_positions_set):
-                        if not next_position in Masons_Your_positions_set:
-                            actions[Mason_id - 1].append(id)
-        for i in range(4):
-            next_position = (Masons_positions[Mason_id][0] + direc[i * 2 + 1][0],Masons_positions[Mason_id][1] + direc[i * 2 + 1][1])
-            id = i + 12
-            if inside_board(next_position,H,W):
-                if next_position in (Walls_My_positions_set | Walls_Your_positions_set):
-                    actions[Mason_id - 1].append(id)
+        # for i in range(4):
+        #     next_position = (Masons_positions[Mason_id][0] + direc[i * 2 + 1][0],Masons_positions[Mason_id][1] + direc[i * 2 + 1][1])
+        #     id = i + 8
+        #     if inside_board(next_position,H,W):
+        #         if not next_position in Castle_positions_set:
+        #             if not next_position in (Walls_My_positions_set | Walls_Your_positions_set):
+        #                 if not next_position in Masons_Your_positions_set:
+        #                     actions[Mason_id - 1].append(id)
+        # for i in range(4):
+        #     next_position = (Masons_positions[Mason_id][0] + direc[i * 2 + 1][0],Masons_positions[Mason_id][1] + direc[i * 2 + 1][1])
+        #     id = i + 12
+        #     if inside_board(next_position,H,W):
+        #         if next_position in (Walls_My_positions_set | Walls_Your_positions_set):
+        #             actions[Mason_id - 1].append(id)
             
-    print(actions)
+    # print(actions)
     actions_return = [[] for _ in range(m)]
     for i in range(m):
         for j in range(len(actions[i])):
@@ -148,12 +148,12 @@ def greedy_actions(Masons,Structures,Walls,H,W):
                 if next_position in (Walls_Your_positions_set):
                     actions[Mason_id - 1].append(id)
             
-    print(actions)
+    # print(actions)
     actions_return = [[] for _ in range(m)]
     for i in range(m):
         for j in range(len(actions[i])):
             actions_return[i].append(convert_return[actions[i][j]])
-    print(actions_return) 
+    # print(actions_return) 
     return actions_return
             
 
@@ -315,6 +315,19 @@ def calc(Structures, Walls, Territories, H, W):
             if Walls[i][j] == 2:
                 scoreB += 10
     return (scoreA, scoreB)
+
+def random_move():
+    try:
+        m_ = open("./Field_Data/Field_Masons.txt","r")
+        s_ = open("./Field_Data/Field_Structures.txt","r")
+        w_ = open("./Field_Data/Field_Walls.txt","r")
+        s = eval(s_.read())
+        w = eval(w_.read())
+        m = eval(m_.read())
+        H = W = len(s)
+        return legal_actions(m,s,w,H,W)
+    except:
+        None
 
 def calculate():
     try:

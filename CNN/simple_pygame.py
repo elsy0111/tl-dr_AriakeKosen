@@ -3,8 +3,8 @@ from pygame.locals import *
 # import random_action_
 # import delete_unleach
 # import simple_make_around
-import simple_shortest
-import subprocess
+# import simple_shortest
+# import subprocess
 
 #const ======================================================
 H = 17

@@ -2,15 +2,15 @@ def run():
     # READ FIELD
     field_Masons = open("./Field_Data/Field_Masons.txt","r")
     field_Walls = open("./Field_Data/Field_Walls.txt","r")
-    field_Structures = open("./Field_Data/Field_Structures.txt","r")
+    # field_Structures = open("./Field_Data/Field_Structures.txt","r")
 
     field_Masons_Arr = eval(field_Masons.read())
     field_Walls_Arr = eval(field_Walls.read())
-    field_Structures_Arr = eval(field_Structures.read())
+    # field_Structures_Arr = eval(field_Structures.read())
 
     field_Masons.close()
     field_Walls.close()
-    field_Structures.close()
+    # field_Structures.close()
 
     # READ PLAN
     # plan_move = open("./Plan/Move.txt", "r")
@@ -38,8 +38,8 @@ def run():
             return False
         if field_Walls_Arr[i][j] != 0:
             return False
-        if field_Structures_Arr[i][j] == 2:
-            return False
+        # if field_Structures_Arr[i][j] == 2:
+        #     return False
         return True
 
 
@@ -76,6 +76,11 @@ def run():
             d = 2 * di + 1
             if plan_build_Arr[mason[0] + id_dict[d][0]][mason[1] + id_dict[d][1]]:
                 if build_able(mason[0] + id_dict[d][0],mason[1] + id_dict[d][1]):
-                    run_[mason_idx].insert(0,8 + di)
+                    if field_Walls_Arr[mason[0] + id_dict[d][0]][mason[1] + id_dict[d][1]] == 2:
+                        run_[mason_idx].insert(0,8 + di)
+                        run_[mason_idx].insert(0,12 + di)
+                    else:
+                        run_[mason_idx].insert(0,8 + di)
+                        
     f.write(str(run_))
     f.close()
