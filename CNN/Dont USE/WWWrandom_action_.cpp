@@ -167,6 +167,7 @@ int move_able_random(std::pair<int, int> point) {
             move_able_li.push_back(d);
         }
     }
+    move_able_li.push_back(16);
     int random_index = rand() % move_able_li.size();
     return move_able_li[random_index];
 }
@@ -196,7 +197,7 @@ int main() {
     }
     masons_point_before = {masons_point_A.begin(), masons_point_A.end()};
 
-    while (cnt < 10000) {
+    while (cnt < 30000) {
         cnt++;
         std::vector<std::pair<int, int>> masons_point= masons_point_A;
         masons_point_before = std::set<std::pair<int, int>>(masons_point.begin(), masons_point.end());
@@ -215,27 +216,30 @@ int main() {
                     masons_que[mason]--;
                     continue;
                 }
-
+                int i,j;
                 int move_d = move_able_random(masons_point[mason]);
-                int i = masons_point[mason].first + direction_dict[move_d].first;
-                int j = masons_point[mason].second + direction_dict[move_d].second;
-                masons_point_before.erase({masons_point[mason].first, masons_point[mason].second});
-                masons_point[mason] = {i, j};
-                masons_point_before.insert({i, j});
+                if (move_d != 16){
+                    i = masons_point[mason].first + direction_dict[move_d].first;
+                    j = masons_point[mason].second + direction_dict[move_d].second;
+                    masons_point_before.erase({masons_point[mason].first, masons_point[mason].second});
+                    masons_point[mason] = {i, j};
+                    masons_point_before.insert({i, j});
 
-                if (field_walls[i][j] == 2) {
-                    masons_que[mason]++;
-                    log_li[mason].push_back(move_break_dict[move_d]);
-                    if (build_set.find({i, j}) != build_set.end()) {
-                        build_set.erase({i, j});
+                    if (field_walls[i][j] == 2) {
+                        masons_que[mason]++;
+                        log_li[mason].push_back(move_break_dict[move_d]);
+                        if (build_set.find({i, j}) != build_set.end()) {
+                            build_set.erase({i, j});
+                        }
                     }
+                    log_li[mason].push_back(move_d);  
                 }
-                log_li[mason].push_back(move_d);
-
+                else{
+                    masons_que[mason]--;
+                }
                 if (move_set.count(masons_point[mason])) {
                     move_set.erase(masons_point[mason]);
                 }
-
                 for (int wall_d = 8; wall_d < 12; ++wall_d) {
                     i = masons_point[mason].first + direction_dict[wall_d].first;
                     j = masons_point[mason].second + direction_dict[wall_d].second;
@@ -254,7 +258,7 @@ int main() {
                     }
 
                     if (break_set.find({i, j}) != break_set.end()) {
-                        if (field_walls[i][j] == 2) {
+                        if (field_walls[i][j] != 0) {
                             masons_que[mason]++;
                             log_li[mason].push_back(build_break_dict[wall_d]);
                             break_set.erase({i, j});

@@ -88,6 +88,7 @@ t = 0
 cnt = 0
 
 masons_point_A = [(-1,-1) for _ in range(6)]
+
 n = 0
 for i in range(h):
     for j in range(w):

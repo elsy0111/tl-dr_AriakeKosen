@@ -5,15 +5,9 @@ from pygame.locals import *
 import subprocess
 
 #const ======================================================
-m_ = open("./Field_Data/Field_Masons.txt")
-m = eval(m_.read())
-H = len(m)
-masons = 0
-for i in range(H):
-    for j in range(H):
-        if m[i][j] > 0:
-            masons += 1
-m_.close()
+H = 15
+masons = 4
+
 screen_width = 1300
 screen_height = 1000
 image_size = (900,900)

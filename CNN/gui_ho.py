@@ -13,7 +13,7 @@ import json
 p = 0
 
 # url = "https://www.procon.gr.jp/"
-url = "http://122.28.01/:8080"
+url = "http://172.28.0.1:8080/"
 api_token = "ariakee5d5af0c7ad9401b6449eda7ee0e8730f24f77d5b6da2ac615aca3c1f4"
 # api_token = "A"
 # header = {"procon-token" : api_token}
@@ -56,7 +56,6 @@ def get_matches():
     status_code = r.status_code
     print("get_match status_code :", r.status_code)
     return response["matches"], status_code
-
 
 def get_matching(id : int):
     """
@@ -281,21 +280,24 @@ def page1():
 
     Get_Matches = st.button("Get_Matches")
     if Get_Matches:
-        print("\n// Get_Matches ==================")
-        st.session_state.dt_now1 = datetime.now()
-        st.session_state.res1, st.session_state.status_code1 = get_matches()
+        try:
+            print("\n// Get_Matches ==================")
+            st.session_state.dt_now1 = datetime.now()
+            st.session_state.res1, st.session_state.status_code1 = get_matches()
 
 
-        st.session_state.is_first = st.session_state.res1[p]["first"]
-        st.session_state.size = st.session_state.res1[p]["board"]["width"]
-        st.session_state.mason = st.session_state.res1[p]["board"]["mason"]
-        st.session_state.turnSeconds = st.session_state.res1[p]["turnSeconds"]
-        st.session_state.opponent = st.session_state.res1[p]["opponent"]
-        st.session_state.turns = st.session_state.res1[p]["turns"]
-        st.session_state.ID = st.session_state.res1[p]["id"]
+            st.session_state.is_first = st.session_state.res1[p]["first"]
+            st.session_state.size = st.session_state.res1[p]["board"]["width"]
+            st.session_state.mason = st.session_state.res1[p]["board"]["mason"]
+            st.session_state.turnSeconds = st.session_state.res1[p]["turnSeconds"]
+            st.session_state.opponent = st.session_state.res1[p]["opponent"]
+            st.session_state.turns = st.session_state.res1[p]["turns"]
+            st.session_state.ID = st.session_state.res1[p]["id"]
 
-        lib.convert_before_match(st.session_state.res1[p]["board"]["masons"], st.session_state.res1[p]["board"]["structures"])
-        print("\n   Get_Matches ==================//")
+            lib.convert_before_match(st.session_state.res1[p]["board"]["masons"], st.session_state.res1[p]["board"]["structures"])
+            print("\n   Get_Matches ==================//")
+        except:
+            None
 
     # Input / Output ========================================================
     st.markdown(f"""
@@ -398,7 +400,7 @@ def page4():
             
         def run(self):
             while not self.should_stop.wait(0):
-                time.sleep(.5)
+                time.sleep(1.5)
                 # print("\n// Visualizer ==================")
                 self.c = False
                 try:
@@ -476,7 +478,7 @@ def page4():
                         ## Turn : {st.session_state.turn_now} / {st.session_state.turns}
                         ## Score : {worker.scoreA} vs {worker.scoreB}
             """)
-            time.sleep(.2)
+            time.sleep(.7)
 
 def page7():
     # global is_accepted
@@ -513,44 +515,47 @@ def page7():
 
         def run(self):
             while not self.should_stop.wait(0):
-                print(datetime.now())
-                time.sleep(1)
-                print("\n //Auto Posting ===========================")
-                f = open("./Plan/run.txt", "r")
-                Actions_Arr = eval(f.read())
-                f.close()
-                Send_Arr = [[] for _ in range(self.mason)]
-                print(Actions_Arr)
-                self.queue = Actions_Arr
+                try:
+                    print(datetime.now())
+                    time.sleep(1)
+                    print("\n //Auto Posting ===========================")
+                    f = open("./Plan/run.txt", "r")
+                    Actions_Arr = eval(f.read())
+                    f.close()
+                    Send_Arr = [[] for _ in range(self.mason)]
+                    print(Actions_Arr)
+                    self.queue = Actions_Arr
 
-                for i in range(self.mason):
-                    if len(Actions_Arr[i]) > 0:
-                        Send_Arr[i] = id2action[Actions_Arr[i][0]]
-                    else:
-                        Send_Arr[i] = id2action[16]
+                    for i in range(self.mason):
+                        if len(Actions_Arr[i]) > 0:
+                            Send_Arr[i] = id2action[Actions_Arr[i][0]]
+                        else:
+                            Send_Arr[i] = id2action[16]
 
-                print(Send_Arr)
-                self.res_get, self.status_code_get = get_matching(self.ID)
-                self.turn_now = self.res_get["turn"]
-                self.is_first = self.res_get["first"]
-                if (self.turn_now + self.is_first) % 2:
-                    print("POST")
+                    print(Send_Arr)
+                    self.res_get, self.status_code_get = get_matching(self.ID)
+                    self.turn_now = self.res_get["turn"]
+                    self.is_first = self.res_get["first"]
+                    if (self.turn_now + self.is_first) % 2:
+                        print("POST")
 
-                    if not is_accepted[self.turn_now]:
-                        f = open("./Plan/run.txt", "w")
-                        Arr_ = [[]for _ in range(self.mason)]
-                        for i in range(self.mason):
-                            Arr_[i] = Actions_Arr[i][1:]
-                        f.write(str(Arr_))
-                        f.close()
-                        print("SEND!!!!!!!!!!")
-                        self.posted, self.res7, self.status_code7 = post_actions(self.ID, 
-                                                                                self.turn_now + 1, 
-                                                                                str(Send_Arr))
-                        if self.status_code7 == 200:
-                            print("200")
-                            self.dt_now7 = datetime.now()
-                            is_accepted[self.turn_now] = 1
+                        if not is_accepted[self.turn_now]:
+                            f = open("./Plan/run.txt", "w")
+                            Arr_ = [[]for _ in range(self.mason)]
+                            for i in range(self.mason):
+                                Arr_[i] = Actions_Arr[i][1:]
+                            f.write(str(Arr_))
+                            f.close()
+                            print("SEND!!!!!!!!!!")
+                            self.posted, self.res7, self.status_code7 = post_actions(self.ID, 
+                                                                                    self.turn_now + 1, 
+                                                                                    str(Send_Arr))
+                            if self.status_code7 == 200:
+                                print("200")
+                                self.dt_now7 = datetime.now()
+                                is_accepted[self.turn_now] = 1
+                except:
+                    continue
 
     st.markdown(f"""
                 ## ID : {st.session_state.ID}

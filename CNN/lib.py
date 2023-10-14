@@ -368,7 +368,6 @@ def convert_before_match(m,s):
     # try:
     if 1:
         s_ = open("./Field_Data/Field_Structures.txt","w")
-
         m_ = open("./Field_Data/Field_Masons.txt","w")
 
         # if Bool == False:
@@ -384,7 +383,7 @@ def convert_before_match(m,s):
         s_.write(str(s))
         s_.close()
 
-        print("converted!")
+        print("BEFORE MATCH")
         # return legal_actions(m,s,w,H,W)
         # return greedy_actions(m,s,w,H,W)
     # except:
