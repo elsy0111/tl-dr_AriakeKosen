@@ -1,7 +1,8 @@
 import pygame
 from pygame.locals import *
-import random_action_
-import delete_unleach
+# import random_action_
+# import delete_unleach
+import subprocess
 
 #const ======================================================
 m_ = open("./Field_Data/Field_Masons.txt")
@@ -329,8 +330,9 @@ while running:
                     
                     Selected_Rect = []
                     
-                    delete_unleach.convert()
-                    random_action_.run()
+                    # delete_unleach.convert()
+                    # random_action_.run()
+                    subprocess.run(["a.exe", ">", "Plan/run.txt"], shell = True)
 
                     f = open("./Plan/Move.txt", "w")
                     f.write(str(init_Arr))
