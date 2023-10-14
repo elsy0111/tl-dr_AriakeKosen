@@ -13,9 +13,9 @@ import json
 p = 0
 
 # url = "https://www.procon.gr.jp/"
-url = "http://127.0.0.1:3000/"
-# api_token = "ariakee5d5af0c7ad9401b6449eda7ee0e8730f24f77d5b6da2ac615aca3c1f4"
-api_token = "A"
+url = "http://122.28.01/:8080"
+api_token = "ariakee5d5af0c7ad9401b6449eda7ee0e8730f24f77d5b6da2ac615aca3c1f4"
+# api_token = "A"
 # header = {"procon-token" : api_token}
 is_accepted = [False for _ in range(201)]
 
