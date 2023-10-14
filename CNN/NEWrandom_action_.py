@@ -41,15 +41,15 @@ std::vector<std::vector<int>> read_field(std::string path){
     file.close();
     return result;
 }
-/*
+
 std::vector<std::vector<int>> field_masons = read_field("./Field_Data/Field_Masons.txt"),
                               field_walls = read_field("./Field_Data/Field_Walls.txt"),
                               field_structures = read_field("./Field_Data/Field_Masons.txt"),
                               build_vec = read_field("./Plan/Build.txt"),
                               move_vec = read_field("./Plan/Move.txt"),
                               break_vec = read_field("./Plan/Break.txt");
-*/
 
+/*
 std::vector<std::vector<int>> field_masons = {
     {0, 0, 0, 0, 0, 1, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
@@ -112,7 +112,7 @@ std::vector<std::vector<int>> break_vec = {
     {0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0}
 };
-
+*/
 
 const int h = field_masons.size();
 const int w = field_masons[0].size();
