@@ -220,7 +220,7 @@ int main() {
 
                 int move_d = move_able_random(masons_point[mason]);
                 int i,j;
-                if (move_d!=16){
+                if (move_d != 16){
                     i = masons_point[mason].first + direction_dict[move_d].first;
                     j = masons_point[mason].second + direction_dict[move_d].second;
                     masons_point_before.erase({masons_point[mason].first, masons_point[mason].second});

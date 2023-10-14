@@ -1,7 +1,6 @@
 import pygame
 import numpy as np
 
-
 CELL_SIZE = 100  # px
 
 imageScaler = np.array((CELL_SIZE, CELL_SIZE))
@@ -34,6 +33,12 @@ areaBImage = pygame.transform.scale(
 )
 areaABImage = pygame.transform.scale(
     pygame.image.load("./img/area_AB.png"), imageScaler
+)
+build_plan = pygame.transform.scale(
+    pygame.image.load("./img/select_build_plan.png"), imageScaler
+)
+move_plan = pygame.transform.scale(
+    pygame.image.load("./img/select_move_plan.png"), imageScaler
 )
 
 def save(WS, fileName):
@@ -120,7 +125,7 @@ def captureField_area(W, H, WS, field0, field, field2, fileName):
     save(WS, fileName)
     # pygame.image.save(WS, fileName + ".png")
 
-def captureField_all(W, H, WS, field, field2, field3, fileName):
+def captureField_all(W, H, WS, field, field2, field3, fileName, plan_move_arr,plan_build_arr):
     for i in range(H):
         for j in range(W):
             placeImage(WS, blankImage, i, j)
@@ -155,6 +160,12 @@ def captureField_all(W, H, WS, field, field2, field3, fileName):
                 placeImage(WS, workerAImage, i, j)
             if field2[i][j] < 0:
                 placeImage(WS, workerBImage, i, j)
+
+            if plan_build_arr[i][j]:
+                placeImage(WS, build_plan, i, j)
+
+            if plan_move_arr[i][j]:
+                placeImage(WS, move_plan, i, j)
         # print()
     drawGrids(W, H, WS)
     save(WS, fileName)
@@ -187,7 +198,23 @@ def main():
                       fileName="./Field_Data/visualized_wall_territories.png")
     pygame.init()
     WS = pygame.display.set_mode((CELL_SIZE * W, CELL_SIZE * H))
+
+
+
+    # READ PLAN
+    plan_move = open("./Plan/Move.txt", "r")
+    plan_build = open("./Plan/Build.txt", "r")
+    # plan_make_around = open("./Plan/make_around.txt", "r")
+
+    plan_move_Arr = eval(plan_move.read())
+    plan_build_Arr = eval(plan_build.read())
+    # plan_make_around_Arr = eval(plan_make_around.read())
+
+    plan_move.close()
+    plan_build.close()
+    # plan_make_around.close()
     captureField_all(W, H, WS, field, field2, field3, 
-                      fileName="./Field_Data/visualized_all.png")
+                      fileName="./Field_Data/visualized_all.png",plan_move_arr=plan_move_Arr,plan_build_arr=plan_build_Arr)
     # print("Finished", end = "")
 # main()
+

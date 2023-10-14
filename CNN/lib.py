@@ -356,7 +356,7 @@ def convert(m,s,w,t,Bool):
 
         t_.write(str(t))
         t_.close()
-        print("converted!")
+        # print("converted!")
         # return legal_actions(m,s,w,H,W)
         # return greedy_actions(m,s,w,H,W)
     # except:
@@ -367,8 +367,8 @@ def convert(m,s,w,t,Bool):
 def convert_before_match(m,s):
     # try:
     if 1:
-        s_ = open("./Field_Data/Field_Structures.txt","w")
         m_ = open("./Field_Data/Field_Masons.txt","w")
+        s_ = open("./Field_Data/Field_Structures.txt","w")
 
         # if Bool == False:
         #     print("REVERSE")
@@ -377,10 +377,10 @@ def convert_before_match(m,s):
         #     t = rev_Territories(t)
 
         m_.write(str(m))
-        m_.close()
-
-
         s_.write(str(s))
+
+
+        m_.close()
         s_.close()
 
         print("BEFORE MATCH")
